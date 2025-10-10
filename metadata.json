@@ -1,0 +1,5 @@
+{
+  "name": "Simulatore Esame Radioamatore",
+  "description": "Un'applicazione per esercitarsi con i quiz per l'esame della patente da radioamatore, con simulazioni d'esame, riepilogo dei risultati e salvataggio in PDF.",
+  "requestFramePermissions": []
+}
