@@ -12,7 +12,6 @@ export interface Question {
   text: string;
   options: string[];
   correctAnswer: number; // index of the correct option
-  explanation: string;
 }
 
 export interface UserAnswer {

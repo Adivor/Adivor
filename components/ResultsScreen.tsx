@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Question, UserAnswer } from '../types';
 import { PASSING_SCORE_PERCENTAGE } from '../constants';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
+import { GoogleGenAI } from '@google/genai';
 
 interface ResultsScreenProps {
   questions: Question[];
@@ -16,7 +17,9 @@ interface ResultsScreenProps {
 
 const PDF_ELEMENT_ID = 'pdf-results';
 
-export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, isStudyMode }) => {
+export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode }) => {
+  const [aiExplanations, setAiExplanations] = useState<Record<number, string | null>>({});
+  const [loadingExplanationId, setLoadingExplanationId] = useState<number | null>(null);
 
   const { score, correctAnswers, incorrectAnswers, isPassed } = useMemo(() => {
     let correctCount = 0;
@@ -34,6 +37,39 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
       isPassed: scorePercentage >= PASSING_SCORE_PERCENTAGE,
     };
   }, [questions, userAnswers]);
+
+  const handleGenerateExplanation = async (question: Question) => {
+    if (loadingExplanationId !== null) return;
+    
+    setLoadingExplanationId(question.id);
+    
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      
+      const optionsString = question.options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n');
+      const correctOption = `${String.fromCharCode(65 + question.correctAnswer)}) ${question.options[question.correctAnswer]}`;
+
+      const prompt = `Sei un esperto istruttore per l'esame da radioamatore. Spiega in modo chiaro, conciso e in italiano perché la risposta corretta alla seguente domanda è '${correctOption}'.
+Domanda: "${question.text}"
+Opzioni:
+${optionsString}
+
+Fornisci una spiegazione didattica, concentrandoti sul concetto tecnico o normativo alla base della risposta corretta. Se opportuno, spiega brevemente perché le altre opzioni sono errate.`;
+
+      const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt
+      });
+
+      setAiExplanations(prev => ({ ...prev, [question.id]: response.text }));
+
+    } catch (error) {
+      console.error("Errore durante la generazione della spiegazione:", error);
+      setAiExplanations(prev => ({ ...prev, [question.id]: "Si è verificato un errore durante la generazione della spiegazione. Riprova." }));
+    } finally {
+      setLoadingExplanationId(null);
+    }
+  };
 
   const headerIconColor = isPracticeMode 
     ? 'text-amber-400' 
@@ -77,7 +113,6 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                 const userAnswer = userAnswers.find(a => a.questionId === question.id);
                 const isCorrect = userAnswer?.answerIndex === question.correctAnswer;
                 const unanswered = userAnswer?.answerIndex === null;
-                const hasExplanation = question.explanation && question.explanation !== 'La spiegazione per questa domanda sarà disponibile a breve.';
 
                 return (
                   <div key={question.id} className="p-4 bg-slate-700/40 rounded-lg border border-slate-600">
@@ -87,38 +122,64 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                         <span className="font-mono text-amber-400 mr-2">{index + 1}.</span> {question.text}
                         </p>
                     </div>
-                    {unanswered && (
-                        <div className="p-3 rounded border border-yellow-500 bg-yellow-500/20 text-yellow-300 mb-2 ml-9">
-                            Non hai risposto a questa domanda.
-                        </div>
-                    )}
+                    
                     <div className="space-y-2 ml-9">
+                      {unanswered && (
+                          <div className="p-3 rounded border border-yellow-500 bg-yellow-500/20 text-yellow-300 mb-2">
+                              Non hai risposto a questa domanda.
+                          </div>
+                      )}
                       {question.options.map((option, optIndex) => {
                         const isUserChoice = userAnswer?.answerIndex === optIndex;
                         const isCorrectAnswer = question.correctAnswer === optIndex;
                         
-                        let optionClass = 'border-slate-500 bg-slate-600/50';
+                        let optionClass = 'border-slate-600 bg-slate-800/50 text-slate-300';
+                        let label = null;
+
                         if (isCorrectAnswer) {
                             optionClass = 'border-green-500 bg-green-500/20 text-white';
+                            label = <span className="ml-auto text-xs font-bold text-green-300">[ RISPOSTA CORRETTA ]</span>;
                         }
                         if (isUserChoice && !isCorrect) {
                             optionClass = 'border-red-500 bg-red-500/20 text-white';
+                            label = <span className="ml-auto text-xs font-bold text-red-300">[ TUA RISPOSTA ]</span>;
                         }
 
                         return (
                           <div key={optIndex} className={`p-3 rounded border ${optionClass} flex items-center`}>
                             <span className="font-mono mr-3">{String.fromCharCode(65 + optIndex)}.</span>
                             <span>{option}</span>
-                            {isUserChoice && !isCorrect && <span className="ml-auto text-xs font-bold text-red-300">[ TUA RISPOSTA ]</span>}
-                            {isCorrectAnswer && <span className={`ml-auto text-xs font-bold ${!isUserChoice ? 'text-green-300' : ''} ${isUserChoice && 'hidden pdf-unhide'}`}>[ RISPOSTA CORRETTA ]</span>}
+                            {label}
                           </div>
                         );
                       })}
                     </div>
-                    {(isStudyMode || !isCorrect) && hasExplanation && (
+                    
+                    {!aiExplanations[question.id] && (
+                      <div className="mt-4 ml-9">
+                        <button
+                          onClick={() => handleGenerateExplanation(question)}
+                          disabled={loadingExplanationId !== null}
+                          className="bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-500 transition-colors disabled:bg-slate-600 disabled:cursor-wait text-sm"
+                          aria-label={`Genera spiegazione per la domanda ${index + 1}`}
+                          aria-live="polite"
+                        >
+                          {loadingExplanationId === question.id ? (
+                            <span className="flex items-center">
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Generazione...
+                            </span>
+                          ) : 'Spiegazione AI'}
+                        </button>
+                      </div>
+                    )}
+                    {aiExplanations[question.id] && (
                       <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
-                          <p className="font-semibold text-amber-300 text-sm mb-1">Spiegazione:</p>
-                          <p className="text-slate-300 text-sm">{question.explanation}</p>
+                          <p className="font-semibold text-sky-300 text-sm mb-1">Spiegazione AI:</p>
+                          <p className="text-slate-300 text-sm whitespace-pre-wrap">{aiExplanations[question.id]}</p>
                       </div>
                     )}
                   </div>
