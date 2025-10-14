@@ -64,13 +64,24 @@ function parseQuestions(rawText: string, category: QuestionCategory): Question[]
 }
 
 
-const ALL_QUESTIONS: Question[] = [
+const allQuestionsRaw: Question[] = [
     ...parseQuestions(radiotecnica1Data, QuestionCategory.RADIOTECNICA_1),
     ...parseQuestions(radiotecnica2Data, QuestionCategory.RADIOTECNICA_2),
     ...parseQuestions(radiotecnica3Data, QuestionCategory.RADIOTECNICA_3),
     ...parseQuestions(codiceQData, QuestionCategory.CODICE_Q),
     ...parseQuestions(regolamentiData, QuestionCategory.REGOLAMENTI),
 ];
+
+// Rimuove le domande duplicate basandosi sul testo per garantire l'unicità in ogni quiz.
+const uniqueQuestionsMap = new Map<string, Question>();
+allQuestionsRaw.forEach(question => {
+    const normalizedText = question.text.trim().replace(/\s+/g, ' ');
+    if (!uniqueQuestionsMap.has(normalizedText)) {
+        uniqueQuestionsMap.set(normalizedText, question);
+    }
+});
+
+const ALL_QUESTIONS: Question[] = Array.from(uniqueQuestionsMap.values());
 
 
 function shuffleArray<T,>(array: T[]): T[] {
