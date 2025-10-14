@@ -115,7 +115,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                         );
                       })}
                     </div>
-                    {isStudyMode && hasExplanation && (
+                    {(isStudyMode || !isCorrect) && hasExplanation && (
                       <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
                           <p className="font-semibold text-amber-300 text-sm mb-1">Spiegazione:</p>
                           <p className="text-slate-300 text-sm">{question.explanation}</p>
