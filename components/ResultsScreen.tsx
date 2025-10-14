@@ -1,19 +1,23 @@
-
 import React, { useMemo } from 'react';
-import { Question, UserAnswer } from '../types';
+import { Question, UserAnswer, ExplanationState } from '../types';
 import { PASSING_SCORE_PERCENTAGE } from '../constants';
-import { generatePdf } from '../services/pdfService';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
+import { CheckIcon } from './icons/CheckIcon';
+import { XIcon } from './icons/XIcon';
 
 interface ResultsScreenProps {
   questions: Question[];
   userAnswers: UserAnswer[];
   onRestart: () => void;
+  title: string;
+  isPracticeMode: boolean;
+  explanations: Record<number, ExplanationState>;
+  isStudyMode: boolean;
 }
 
 const PDF_ELEMENT_ID = 'pdf-results';
 
-export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart }) => {
+export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, explanations, isStudyMode }) => {
 
   const { score, correctAnswers, incorrectAnswers, isPassed } = useMemo(() => {
     let correctCount = 0;
@@ -32,21 +36,30 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
     };
   }, [questions, userAnswers]);
 
-  const handleDownloadPdf = async () => {
-    const timestamp = new Date().toISOString().split('T')[0];
-    await generatePdf(PDF_ELEMENT_ID, `Esito_Esame_Radioamatore_${timestamp}.pdf`);
-  };
+  const headerIconColor = isPracticeMode 
+    ? 'text-amber-400' 
+    : isPassed 
+      ? 'text-green-400' 
+      : 'text-red-400';
 
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div id={PDF_ELEMENT_ID} className="bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
           <header className="p-6 text-center bg-slate-900/50 border-b border-slate-700">
-            <RadioWaveIcon className={`w-16 h-16 mx-auto mb-4 ${isPassed ? 'text-green-400' : 'text-red-400'}`} />
-            <h1 className="text-3xl font-bold font-mono text-slate-100">Risultato Esame</h1>
-            <p className={`text-5xl font-bold my-4 ${isPassed ? 'text-green-400' : 'text-red-400'}`}>
-              {isPassed ? 'SUPERATO' : 'NON SUPERATO'}
-            </p>
+            <RadioWaveIcon className={`w-16 h-16 mx-auto mb-4 ${headerIconColor}`} />
+            <h1 className="text-3xl font-bold font-mono text-slate-100">
+              {isPracticeMode ? 'Riepilogo Pratica' : 'Risultato Esame'}
+            </h1>
+            
+            {isPracticeMode ? (
+              <p className="text-2xl font-bold my-4 text-amber-400">{title.replace('Pratica: ', '')}</p>
+            ) : (
+              <p className={`text-5xl font-bold my-4 ${isPassed ? 'text-green-400' : 'text-red-400'}`}>
+                {isPassed ? 'SUPERATO' : 'NON SUPERATO'}
+              </p>
+            )}
+
             <div className="flex justify-center gap-8 text-lg">
               <div className="text-green-400">
                 <span className="font-bold">{correctAnswers}</span> Risposte Corrette
@@ -55,7 +68,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                 <span className="font-bold">{incorrectAnswers}</span> Risposte Errate
               </div>
             </div>
-             <p className="text-slate-400 text-sm mt-4">Soglia superamento: {PASSING_SCORE_PERCENTAGE}%</p>
+             {!isPracticeMode && <p className="text-slate-400 text-sm mt-4">Soglia superamento: {PASSING_SCORE_PERCENTAGE}%</p>}
           </header>
 
           <main className="p-6">
@@ -64,13 +77,23 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
               {questions.map((question, index) => {
                 const userAnswer = userAnswers.find(a => a.questionId === question.id);
                 const isCorrect = userAnswer?.answerIndex === question.correctAnswer;
+                const unanswered = userAnswer?.answerIndex === null;
+                const explanation = explanations[question.id];
 
                 return (
                   <div key={question.id} className="p-4 bg-slate-700/40 rounded-lg border border-slate-600">
-                    <p className="font-semibold text-lg text-slate-200 mb-3">
-                      <span className="font-mono text-amber-400 mr-2">{index + 1}.</span> {question.text}
-                    </p>
-                    <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                        {isCorrect ? <CheckIcon className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" /> : <XIcon className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />}
+                        <p className="font-semibold text-lg text-slate-200 mb-3">
+                        <span className="font-mono text-amber-400 mr-2">{index + 1}.</span> {question.text}
+                        </p>
+                    </div>
+                    {unanswered && (
+                        <div className="p-3 rounded border border-yellow-500 bg-yellow-500/20 text-yellow-300 mb-2 ml-9">
+                            Non hai risposto a questa domanda.
+                        </div>
+                    )}
+                    <div className="space-y-2 ml-9">
                       {question.options.map((option, optIndex) => {
                         const isUserChoice = userAnswer?.answerIndex === optIndex;
                         const isCorrectAnswer = question.correctAnswer === optIndex;
@@ -93,24 +116,31 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                         );
                       })}
                     </div>
+                    {isStudyMode && (
+                      <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
+                          <p className="font-semibold text-amber-300 text-sm mb-1">Spiegazione (IA):</p>
+                          {!explanation || explanation.isLoading ? (
+                              <div className="flex items-center text-slate-400 text-sm">
+                                  <div className="w-4 h-4 border-2 border-dashed rounded-full animate-spin border-amber-400 mr-2"></div>
+                                  <span>Generando spiegazione...</span>
+                              </div>
+                          ) : (
+                              <p className={`text-slate-300 text-sm ${explanation.error ? 'text-red-400' : ''}`}>{explanation.text}</p>
+                          )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
           </main>
         </div>
-        <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+        <div className="mt-8 flex justify-center items-center">
           <button
             onClick={onRestart}
-            className="w-full sm:w-auto bg-slate-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-slate-500 transition-colors"
+            className="bg-slate-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-slate-500 transition-colors"
           >
-            Nuova Simulazione
-          </button>
-          <button
-            onClick={handleDownloadPdf}
-            className="w-full sm:w-auto bg-amber-500 text-slate-900 font-bold py-3 px-8 rounded-lg text-lg hover:bg-amber-400 transition-colors"
-          >
-            Scarica Riepilogo (PDF)
+            Torna alla Home
           </button>
         </div>
       </div>

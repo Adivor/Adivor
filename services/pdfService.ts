@@ -1,12 +1,42 @@
-
 // Inform TypeScript about the global variables from the CDN scripts
-declare const html2canvas: (element: HTMLElement, options?: any) => Promise<HTMLCanvasElement>;
-declare const jspdf: { jsPDF: new (options?: any) => any };
+// We will access them via the window object for robustness.
+
+// Helper function to wait for libraries with a retry mechanism
+const checkLibraries = (retries = 10, delay = 200): Promise<boolean> => {
+    return new Promise((resolve) => {
+        const tryCheck = (attempt: number) => {
+            const html2canvas = (window as any).html2canvas;
+            const jspdf = (window as any).jspdf;
+
+            if (html2canvas && jspdf) {
+                resolve(true);
+            } else if (attempt < retries) {
+                setTimeout(() => tryCheck(attempt + 1), delay);
+            } else {
+                resolve(false);
+            }
+        };
+        tryCheck(0);
+    });
+};
+
 
 export const generatePdf = async (elementId: string, fileName: string): Promise<void> => {
+  const librariesLoaded = await checkLibraries();
+  
+  if (!librariesLoaded) {
+    console.error("html2canvas or jspdf is not loaded. Check the script tags in index.html.");
+    alert("Errore nella generazione del PDF. Le librerie necessarie non sono state caricate in tempo. Riprova tra qualche istante.");
+    return;
+  }
+
+  const html2canvas = (window as any).html2canvas;
+  const jspdf = (window as any).jspdf;
+
   const resultsElement = document.getElementById(elementId);
   if (!resultsElement) {
     console.error("Element not found for PDF generation");
+    alert("Errore interno: impossibile trovare l'elemento dei risultati per la stampa.");
     return;
   }
   
@@ -56,6 +86,7 @@ export const generatePdf = async (elementId: string, fileName: string): Promise<
 
   } catch (error) {
     console.error("Error generating PDF:", error);
+    alert("Si è verificato un errore durante la creazione del PDF.");
   } finally {
      // Hide the elements again after capture
      elementsToUnhide.forEach(el => el.classList.add('hidden'));

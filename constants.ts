@@ -1,4 +1,3 @@
-
 import { QuestionCategory } from './types';
 
 export const TOTAL_QUESTIONS = 50;
@@ -17,3 +16,5 @@ export const OTHER_CATEGORIES: QuestionCategory[] = [
 ];
 
 export const PASSING_SCORE_PERCENTAGE = 60;
+
+export const QUIZ_DURATION_MINUTES = 60;

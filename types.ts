@@ -1,4 +1,3 @@
-
 export enum QuestionCategory {
   RADIOTECNICA_1 = 'Radiotecnica 1',
   RADIOTECNICA_2 = 'Radiotecnica 2',
@@ -13,6 +12,7 @@ export interface Question {
   text: string;
   options: string[];
   correctAnswer: number; // index of the correct option
+  explanation: string;
 }
 
 export interface UserAnswer {
@@ -21,3 +21,9 @@ export interface UserAnswer {
 }
 
 export type QuizState = 'start' | 'active' | 'finished';
+
+export interface ExplanationState {
+    text: string;
+    isLoading: boolean;
+    error: boolean;
+}
