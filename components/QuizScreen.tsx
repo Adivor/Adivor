@@ -24,6 +24,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   );
   const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION_MINUTES * 60);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [isFinishing, setIsFinishing] = useState(false);
   
   const timeoutRef = useRef<number | null>(null);
 
@@ -94,12 +95,19 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   };
   
   const handleFinishAndGrade = () => {
+    if (isFinishing) return;
+
     const allAnswered = answeredCount === questions.length;
+    const proceedToFinish = () => {
+        setIsFinishing(true);
+        onFinish(userAnswers);
+    };
+
     if (allAnswered) {
-      onFinish(userAnswers);
+      proceedToFinish();
     } else {
       if (window.confirm("Sei sicuro di voler terminare? Le domande senza risposta verranno contate come errate.")) {
-        onFinish(userAnswers);
+        proceedToFinish();
       }
     }
   };
@@ -211,13 +219,14 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
 
              <button
                 onClick={handleFinishAndGrade}
+                disabled={isFinishing}
                 className={`font-bold py-2 px-6 rounded-lg transition-colors ${
                     answeredCount === questions.length 
                     ? 'bg-green-600 hover:bg-green-500 text-white animate-pulse' 
                     : 'bg-amber-600 hover:bg-amber-500 text-white'
-                }`}
+                } disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500`}
             >
-                Termina e Valuta
+                {isFinishing ? 'Valutazione...' : 'Termina e Valuta'}
             </button>
 
             <button

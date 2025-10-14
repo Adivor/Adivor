@@ -6,7 +6,22 @@ import radiotecnica2Data from '../data/radiotecnica2';
 import radiotecnica3Data from '../data/radiotecnica3';
 import codiceQData from '../data/codiceQ';
 import regolamentiData from '../data/regolamenti';
-import { explanations } from '../data/explanations';
+
+// Import explanations from separate files
+import { radiotecnica1Explanations } from '../data/explanations/radiotecnica1';
+import { radiotecnica2Explanations } from '../data/explanations/radiotecnica2';
+import { radiotecnica3Explanations } from '../data/explanations/radiotecnica3';
+import { codiceQExplanations } from '../data/explanations/codiceQ';
+import { regolamentiExplanations } from '../data/explanations/regolamenti';
+
+// Merge all explanations into a single object for easy lookup
+const allExplanations: Record<number, string> = {
+    ...radiotecnica1Explanations,
+    ...radiotecnica2Explanations,
+    ...radiotecnica3Explanations,
+    ...codiceQExplanations,
+    ...regolamentiExplanations,
+};
 
 let questionIdCounter = 1;
 
@@ -45,7 +60,7 @@ function parseQuestions(rawText: string, category: QuestionCategory): Question[]
             const correctAnswer = correctLetter.charCodeAt(0) - 'A'.charCodeAt(0);
             
             const newId = questionIdCounter++;
-            const explanation = explanations[newId] || 'La spiegazione per questa domanda sarà disponibile a breve.';
+            const explanation = allExplanations[newId] || 'La spiegazione per questa domanda sarà disponibile a breve.';
 
             if (correctAnswer >= 0 && correctAnswer <= 3) {
                 questions.push({
