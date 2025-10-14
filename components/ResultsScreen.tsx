@@ -46,15 +46,9 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
       
-      const optionsString = question.options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n');
       const correctOption = `${String.fromCharCode(65 + question.correctAnswer)}) ${question.options[question.correctAnswer]}`;
 
-      const prompt = `Sei un esperto istruttore per l'esame da radioamatore. Spiega in modo chiaro, conciso e in italiano perché la risposta corretta alla seguente domanda è '${correctOption}'.
-Domanda: "${question.text}"
-Opzioni:
-${optionsString}
-
-Fornisci una spiegazione didattica, concentrandoti sul concetto tecnico o normativo alla base della risposta corretta. Se opportuno, spiega brevemente perché le altre opzioni sono errate.`;
+      const prompt = `Sei un istruttore d'esame per radioamatori. Spiega in modo **estremamente conciso** (massimo 2-3 frasi) il concetto chiave che rende '${correctOption}' la risposta giusta per la domanda: "${question.text}". Vai dritto al punto, senza preamboli.`;
 
       const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -179,7 +173,7 @@ Fornisci una spiegazione didattica, concentrandoti sul concetto tecnico o normat
                     {aiExplanations[question.id] && (
                       <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
                           <p className="font-semibold text-sky-300 text-sm mb-1">Spiegazione AI:</p>
-                          <p className="text-slate-300 text-sm whitespace-pre-wrap">{aiExplanations[question.id]}</p>
+                          <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">{aiExplanations[question.id]}</p>
                       </div>
                     )}
                   </div>
