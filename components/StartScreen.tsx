@@ -111,7 +111,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
               onClick={() => onStartSimulation(isStudyMode)}
               className="bg-amber-500 text-slate-900 font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-300"
             >
-              Inizia la Simulazione Completa
+              Inizia Il Tuo Esame
             </button>
           </div>
 
