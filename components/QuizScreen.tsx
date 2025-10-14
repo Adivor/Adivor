@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Question, UserAnswer, ExplanationState } from '../types';
+import { Question, UserAnswer } from '../types';
 import { QUIZ_DURATION_MINUTES } from '../constants';
 import { ClockIcon } from './icons/ClockIcon';
 
@@ -10,8 +10,6 @@ interface QuizScreenProps {
   title: string;
   isStudyMode: boolean;
   isPracticeMode: boolean;
-  fetchExplanationForQuestion: (question: Question) => void;
-  explanations: Record<number, ExplanationState>;
 }
 
 type Feedback = {
@@ -19,7 +17,7 @@ type Feedback = {
     selectedIndex: number;
 } | null;
 
-export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onRestart, title, isStudyMode, isPracticeMode, fetchExplanationForQuestion, explanations }) => {
+export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onRestart, title, isStudyMode, isPracticeMode }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>(() => 
     questions.map(q => ({ questionId: q.id, answerIndex: null }))
@@ -28,18 +26,6 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   const [feedback, setFeedback] = useState<Feedback>(null);
   
   const timeoutRef = useRef<number | null>(null);
-
-  // Pre-fetch explanation for the current question in study mode
-  useEffect(() => {
-    if (isStudyMode && questions.length > 0) {
-      const currentQuestion = questions[currentQuestionIndex];
-      // Only fetch if it hasn't been fetched or started fetching
-      if (currentQuestion && !explanations[currentQuestion.id]) {
-        fetchExplanationForQuestion(currentQuestion);
-      }
-    }
-  }, [currentQuestionIndex, questions, isStudyMode, explanations, fetchExplanationForQuestion]);
-
 
   // Clear timeout on unmount
   useEffect(() => {

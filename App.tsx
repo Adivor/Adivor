@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
 import { getQuizQuestions, getQuestionsByCategory } from './services/questionService';
-import { Question, UserAnswer, QuizState, QuestionCategory, ExplanationState } from './types';
-import { GoogleGenAI } from '@google/genai';
+import { Question, UserAnswer, QuizState, QuestionCategory } from './types';
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -14,56 +13,6 @@ const App: React.FC = () => {
   const [quizTitle, setQuizTitle] = useState<string>('');
   const [isPracticeMode, setIsPracticeMode] = useState<boolean>(false);
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
-  const [explanations, setExplanations] = useState<Record<number, ExplanationState>>({});
-
-  const fetchExplanationForQuestion = useCallback(async (question: Question) => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      setExplanations(prev => ({
-        ...prev,
-        [question.id]: { text: 'API Key non configurata.', isLoading: false, error: true }
-      }));
-      return;
-    }
-
-    // Set loading state to prevent re-fetching
-    setExplanations(prev => ({
-      ...prev,
-      [question.id]: { text: '', isLoading: true, error: false }
-    }));
-
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const systemInstruction = "Sei un esperto istruttore per esami da radioamatore. Fornisci una spiegazione chiara e concisa per la domanda fornita. Spiega perché la risposta corretta è tale e, se rilevante, perché le altre sono sbagliate. Rispondi in italiano in non più di 3-4 frasi.";
-      
-      const prompt = `Domanda: ${question.text}
-Opzioni:
-${question.options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n')}
-Risposta Corretta: ${String.fromCharCode(65 + question.correctAnswer)}) ${question.options[question.correctAnswer]}
-
-Spiegazione:`;
-
-      const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: [{ parts: [{ text: prompt }] }],
-          config: {
-            systemInstruction,
-          }
-      });
-      
-      setExplanations(prev => ({
-          ...prev,
-          [question.id]: { text: response.text, isLoading: false, error: false }
-      }));
-    } catch (err) {
-      console.error(`Error fetching explanation for question ${question.id}:`, err);
-      setExplanations(prev => ({
-          ...prev,
-          [question.id]: { text: 'Impossibile generare la spiegazione per questa domanda.', isLoading: false, error: true }
-      }));
-    }
-  }, []);
-
 
   const startQuiz = (getQuestions: () => Question[]) => {
     setIsLoading(true);
@@ -101,7 +50,6 @@ Spiegazione:`;
       setQuizTitle('');
       setIsPracticeMode(false);
       setIsStudyMode(false);
-      setExplanations({}); // Reset explanations
       setQuizState('start');
   }
 
@@ -126,8 +74,6 @@ Spiegazione:`;
                     title={quizTitle} 
                     isStudyMode={isStudyMode} 
                     isPracticeMode={isPracticeMode}
-                    fetchExplanationForQuestion={fetchExplanationForQuestion}
-                    explanations={explanations}
                 />;
       case 'finished':
         return <ResultsScreen 
@@ -136,7 +82,6 @@ Spiegazione:`;
                     onRestart={handleRestart} 
                     title={quizTitle} 
                     isPracticeMode={isPracticeMode}
-                    explanations={explanations}
                     isStudyMode={isStudyMode}
                 />;
       default:

@@ -21,9 +21,3 @@ export interface UserAnswer {
 }
 
 export type QuizState = 'start' | 'active' | 'finished';
-
-export interface ExplanationState {
-    text: string;
-    isLoading: boolean;
-    error: boolean;
-}

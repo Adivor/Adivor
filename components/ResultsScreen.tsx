@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Question, UserAnswer, ExplanationState } from '../types';
+import { Question, UserAnswer } from '../types';
 import { PASSING_SCORE_PERCENTAGE } from '../constants';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
 import { CheckIcon } from './icons/CheckIcon';
@@ -11,13 +11,12 @@ interface ResultsScreenProps {
   onRestart: () => void;
   title: string;
   isPracticeMode: boolean;
-  explanations: Record<number, ExplanationState>;
   isStudyMode: boolean;
 }
 
 const PDF_ELEMENT_ID = 'pdf-results';
 
-export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, explanations, isStudyMode }) => {
+export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, isStudyMode }) => {
 
   const { score, correctAnswers, incorrectAnswers, isPassed } = useMemo(() => {
     let correctCount = 0;
@@ -78,7 +77,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                 const userAnswer = userAnswers.find(a => a.questionId === question.id);
                 const isCorrect = userAnswer?.answerIndex === question.correctAnswer;
                 const unanswered = userAnswer?.answerIndex === null;
-                const explanation = explanations[question.id];
+                const hasExplanation = question.explanation && question.explanation !== 'La spiegazione per questa domanda sarà disponibile a breve.';
 
                 return (
                   <div key={question.id} className="p-4 bg-slate-700/40 rounded-lg border border-slate-600">
@@ -116,17 +115,10 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                         );
                       })}
                     </div>
-                    {isStudyMode && (
+                    {isStudyMode && hasExplanation && (
                       <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
-                          <p className="font-semibold text-amber-300 text-sm mb-1">Spiegazione (IA):</p>
-                          {!explanation || explanation.isLoading ? (
-                              <div className="flex items-center text-slate-400 text-sm">
-                                  <div className="w-4 h-4 border-2 border-dashed rounded-full animate-spin border-amber-400 mr-2"></div>
-                                  <span>Generando spiegazione...</span>
-                              </div>
-                          ) : (
-                              <p className={`text-slate-300 text-sm ${explanation.error ? 'text-red-400' : ''}`}>{explanation.text}</p>
-                          )}
+                          <p className="font-semibold text-amber-300 text-sm mb-1">Spiegazione:</p>
+                          <p className="text-slate-300 text-sm">{question.explanation}</p>
                       </div>
                     )}
                   </div>

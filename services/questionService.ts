@@ -6,6 +6,7 @@ import radiotecnica2Data from '../data/radiotecnica2';
 import radiotecnica3Data from '../data/radiotecnica3';
 import codiceQData from '../data/codiceQ';
 import regolamentiData from '../data/regolamenti';
+import { explanations } from '../data/explanations';
 
 let questionIdCounter = 1;
 
@@ -43,11 +44,12 @@ function parseQuestions(rawText: string, category: QuestionCategory): Question[]
             const correctLetter = correctLine.replace('Risposta:', '').trim().toUpperCase();
             const correctAnswer = correctLetter.charCodeAt(0) - 'A'.charCodeAt(0);
             
-            const explanation = 'La spiegazione per questa domanda sarà disponibile a breve.'; // Default explanation
+            const newId = questionIdCounter++;
+            const explanation = explanations[newId] || 'La spiegazione per questa domanda sarà disponibile a breve.';
 
             if (correctAnswer >= 0 && correctAnswer <= 3) {
                 questions.push({
-                    id: questionIdCounter++,
+                    id: newId,
                     category,
                     text,
                     options,
