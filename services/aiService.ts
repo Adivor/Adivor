@@ -7,7 +7,7 @@ function getAiInstance(): GoogleGenAI {
   if (!aiInstance) {
     // Initialize the Gemini client.
     // This will only be called the first time an explanation is requested.
-    // Ensure the API_KEY is set in the environment variables.
+    // Ensure the API_key is set in the environment variables.
     aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   }
   return aiInstance;
@@ -63,6 +63,6 @@ export async function generateExplanation(question: Question): Promise<string> {
     if (error instanceof Error && error.message.includes('API key')) {
         return 'Errore di configurazione: API key mancante o non valida.';
     }
-    return 'Spiegazione non disponibile a causa di un errore di rete.';
+    return 'A causa delle elevate richieste, la funzione di spiegazione è in questo istante limitata.';
   }
 }

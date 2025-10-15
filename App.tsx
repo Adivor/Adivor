@@ -85,15 +85,19 @@ const App: React.FC = () => {
         });
         setExplanations(loadingExplanations);
 
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
         // Fetch explanations one by one to avoid rate limiting
         for (const question of questions) {
           try {
             const explanation = await generateExplanation(question);
             setExplanations(prev => ({ ...prev, [question.id]: explanation }));
           } catch (error) {
-            console.error(`Failed to generate explanation for question ${question.id}`, error);
-            setExplanations(prev => ({ ...prev, [question.id]: 'Spiegazione non disponibile a causa di un errore di rete.' }));
+            console.error(`Failed to fetch explanation for question ${question.id}`, error);
+            setExplanations(prev => ({ ...prev, [question.id]: 'Errore imprevisto durante il recupero della spiegazione.' }));
           }
+          // Add a small delay between each API call to be more robust against rate limits
+          await delay(250);
         }
       }
     };
@@ -191,7 +195,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
-      <main className="flex-grow">
+      <main className="flex-grow flex flex-col">
         {renderContent()}
       </main>
       <Footer />
