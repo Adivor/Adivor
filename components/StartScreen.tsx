@@ -6,12 +6,15 @@ import { getIncorrectQuestionIds } from '../services/storageService';
 import { PayPalIcon } from './icons/PayPalIcon';
 import { HamQuizLogo } from './icons/HamQuizLogo';
 import { ToggleSwitch } from './ToggleSwitch';
+import { InstallIcon } from './icons/InstallIcon';
 
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
   onStartTopicQuiz: (category: QuestionCategory, isStudyMode: boolean, count: number | 'all') => void;
   onViewQuestions: (category: QuestionCategory) => void;
   onStartReview: (isStudyMode: boolean) => void;
+  canInstall: boolean;
+  onInstallClick: () => void;
 }
 
 interface QuestionCountModalProps {
@@ -69,7 +72,7 @@ const QuestionCountModal: React.FC<QuestionCountModalProps> = ({ category, onClo
 };
 
 
-export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onStartTopicQuiz, onViewQuestions, onStartReview }) => {
+export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onStartTopicQuiz, onViewQuestions, onStartReview, canInstall, onInstallClick }) => {
   const categories = Object.values(QuestionCategory);
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [modalState, setModalState] = useState<{ isOpen: boolean; category: QuestionCategory | null }>({
@@ -123,15 +126,27 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
             <p className="text-slate-300 text-lg mb-8">
               Metti alla prova la tua preparazione con una simulazione completa dell'esame o esercitati sui singoli argomenti.
             </p>
-            <button
-              onClick={() => onStartSimulation(isStudyMode)}
-              className="bg-amber-500 text-slate-900 font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-300"
-            >
-              <div className="leading-tight">
-                <div>Inizia Il Tuo Esame</div>
-                <div className="text-sm font-normal opacity-90">(50 domande)</div>
-              </div>
-            </button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => onStartSimulation(isStudyMode)}
+                className="bg-amber-500 text-slate-900 font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-300"
+              >
+                <div className="leading-tight">
+                  <div>Inizia Il Tuo Esame</div>
+                  <div className="text-sm font-normal opacity-90">(50 domande)</div>
+                </div>
+              </button>
+              {canInstall && (
+                  <button
+                    onClick={onInstallClick}
+                    className="bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-300 flex items-center gap-3"
+                    aria-label="Installa l'applicazione sul tuo dispositivo"
+                  >
+                    <InstallIcon className="w-6 h-6" />
+                    <span>Installa App</span>
+                  </button>
+              )}
+            </div>
           </div>
 
           <div className="mt-8 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">

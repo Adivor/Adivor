@@ -19,6 +19,50 @@ const App: React.FC = () => {
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
   const [explanations, setExplanations] = useState<Record<number, string>>({});
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  // Register service worker for PWA capabilities
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => console.log('Service Worker registered.', registration))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+  }, []);
+
+  // Capture the event that allows prompting the user to install the app
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (!installPrompt) return;
+    
+    // Show the browser's installation prompt
+    installPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    installPrompt.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      // The prompt can only be used once, so we clear it.
+      setInstallPrompt(null);
+    });
+  };
 
   const handleStartSimulation = (studyMode: boolean) => {
     setQuestions(getQuizQuestions());
@@ -179,6 +223,8 @@ const App: React.FC = () => {
           onStartTopicQuiz={handleStartTopicQuiz}
           onViewQuestions={handleViewQuestions}
           onStartReview={handleStartReview}
+          canInstall={!!installPrompt}
+          onInstallClick={handleInstallClick}
         />;
       case 'start':
       default:
@@ -188,6 +234,8 @@ const App: React.FC = () => {
             onStartTopicQuiz={handleStartTopicQuiz}
             onViewQuestions={handleViewQuestions}
             onStartReview={handleStartReview}
+            canInstall={!!installPrompt}
+            onInstallClick={handleInstallClick}
           />
         );
     }
