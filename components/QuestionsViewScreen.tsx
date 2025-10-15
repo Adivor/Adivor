@@ -52,45 +52,45 @@ export const QuestionsViewScreen: React.FC<QuestionsViewScreenProps> = ({ catego
         <>
             <div className="p-4 sm:p-6 md:p-8">
                 <div className="max-w-4xl mx-auto pb-24"> {/* Added padding-bottom to ensure FAB doesn't cover last item */}
-                    <div className="bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
-                        <header className="p-6 text-center bg-slate-900/50 border-b border-slate-700">
-                            <RadioWaveIcon className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-                            <h1 className="text-3xl font-bold font-mono text-slate-100">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <header className="p-6 text-center bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                            <RadioWaveIcon className="w-16 h-16 mx-auto mb-4 text-amber-500 dark:text-amber-400" />
+                            <h1 className="text-3xl font-bold font-mono text-slate-900 dark:text-slate-100">
                                 Elenco Domande
                             </h1>
-                            <p className="text-2xl font-bold my-4 text-amber-400">{category}</p>
+                            <p className="text-2xl font-bold my-4 text-amber-600 dark:text-amber-400">{category}</p>
                         </header>
                         <main className="p-6">
                             <div className="mb-8">
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <SearchIcon className="w-5 h-5 text-slate-500" />
+                                        <SearchIcon className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                                     </span>
                                     <input
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Cerca per parola chiave..."
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition-colors"
+                                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:border-amber-500 dark:focus:border-amber-400 outline-none transition-colors"
                                         aria-label="Cerca domande"
                                     />
                                 </div>
-                                <p className="text-right text-sm text-slate-400 mt-2">
+                                <p className="text-right text-sm text-slate-500 dark:text-slate-400 mt-2">
                                     Trovate {filteredQuestions.length} su {allQuestions.length} domande
                                 </p>
                             </div>
                             <div className="space-y-6">
                                 {filteredQuestions.map((question) => (
-                                    <div key={question.id} className="p-4 bg-slate-700/40 rounded-lg border border-slate-600">
-                                        <p className="font-semibold text-lg text-slate-200 mb-3">
-                                            <span className="font-mono text-amber-400 mr-2">{allQuestions.findIndex(q => q.id === question.id) + 1}.</span> {question.text}
+                                    <div key={question.id} className="p-4 bg-slate-50 dark:bg-slate-700/40 rounded-lg border border-slate-200 dark:border-slate-600">
+                                        <p className="font-semibold text-lg text-slate-800 dark:text-slate-200 mb-3">
+                                            <span className="font-mono text-amber-600 dark:text-amber-400 mr-2">{allQuestions.findIndex(q => q.id === question.id) + 1}.</span> {question.text}
                                         </p>
                                         <div className="space-y-2 ml-9">
                                             {question.options.map((option, optIndex) => {
                                                 const isCorrectAnswer = question.correctAnswer === optIndex;
                                                 const optionClass = isCorrectAnswer 
-                                                    ? 'border-green-500 bg-green-500/20 text-white' 
-                                                    : 'border-slate-600 bg-slate-800/50 text-slate-300';
+                                                    ? 'border-green-500 bg-green-50 text-green-800 dark:border-green-500 dark:bg-green-500/20 dark:text-white' 
+                                                    : 'border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300';
                                                 
                                                 return (
                                                     <div key={optIndex} className={`p-3 rounded border ${optionClass} flex items-center`}>

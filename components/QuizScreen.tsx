@@ -158,8 +158,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
 
   return (
     <div className="flex flex-col flex-grow items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
-        <header className="p-4 bg-slate-900/50 border-b border-slate-700">
+      <div className="max-w-4xl w-full bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <header className="p-4 bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
           <div className="flex justify-between items-center gap-4 mb-2">
             <button 
               onClick={handleReturnHome} 
@@ -168,31 +168,31 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
                 Abbandona
             </button>
             
-            <h2 className="text-lg sm:text-xl font-bold text-amber-300 font-mono text-center truncate hidden md:block">{title}</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-300 font-mono text-center truncate hidden md:block">{title}</h2>
             
             <div className="flex items-center justify-end gap-2 sm:gap-4 flex-shrink-0">
               {!isPracticeMode && (
-                 <div className={`flex items-center gap-1 sm:gap-2 text-base sm:text-lg font-mono font-bold ${isTimeLow ? 'text-red-500 animate-pulse' : 'text-slate-300'}`}>
+                 <div className={`flex items-center gap-1 sm:gap-2 text-base sm:text-lg font-mono font-bold ${isTimeLow ? 'text-red-500 animate-pulse' : 'text-slate-600 dark:text-slate-300'}`}>
                    <ClockIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                    <span>{formatTime(timeLeft)}</span>
                  </div>
               )}
-              <div className="text-base sm:text-lg font-mono text-slate-300 bg-slate-700/50 px-3 py-1 rounded-md flex items-center">
+              <div className="text-base sm:text-lg font-mono text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-700/50 px-3 py-1 rounded-md flex items-center">
                 {isStudyMode && currentCategoryStats && currentCategoryStats.answered > 0 && (
                   <span 
-                    className="text-sky-400 mr-3 text-sm font-bold" 
+                    className="text-sky-500 dark:text-sky-400 mr-3 text-sm font-bold" 
                     title={`Andamento per ${currentQuestion.category}: ${currentCategoryStats.correct}/${currentCategoryStats.answered}`}
                   >
                     {Math.round((currentCategoryStats.correct / currentCategoryStats.answered) * 100)}%
                   </span>
                 )}
-                <span className="text-amber-400">{currentQuestionIndex + 1}</span>/{questions.length}
+                <span className="text-amber-600 dark:text-amber-400">{currentQuestionIndex + 1}</span>/{questions.length}
               </div>
             </div>
           </div>
-          <h2 className="md:hidden text-lg font-bold text-amber-300 font-mono text-center mb-2 truncate">{title}</h2>
+          <h2 className="md:hidden text-lg font-bold text-amber-600 dark:text-amber-300 font-mono text-center mb-2 truncate">{title}</h2>
 
-          <div className="w-full bg-slate-700 rounded-full h-2.5">
+          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
             <div
               className="bg-amber-500 h-2.5 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
@@ -202,8 +202,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
 
         <main className="p-6 md:p-8">
           <div className="mb-6">
-            <p className="text-sm text-amber-400 font-mono mb-2">{currentQuestion.category}</p>
-            <h3 className="text-2xl font-semibold text-slate-100">{currentQuestion.text}</h3>
+            <p className="text-sm text-amber-500 dark:text-amber-400 font-mono mb-2">{currentQuestion.category}</p>
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentQuestion.text}</h3>
           </div>
 
           <div className="space-y-4">
@@ -211,7 +211,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
               const isSelected = currentAnswer?.answerIndex === index;
               
               let animationClass = '';
-              let optionClass = 'bg-slate-700/50 border-slate-600 hover:bg-slate-700 hover:border-slate-500 text-slate-300';
+              let optionClass = 'bg-white border-slate-300 hover:bg-slate-100 hover:border-slate-400 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:hover:bg-slate-700 dark:hover:border-slate-500 dark:text-slate-300';
               
               if (feedback) {
                 const isCorrectAnswer = currentQuestion.correctAnswer === index;
@@ -219,15 +219,15 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
 
                 if (isCorrectAnswer) {
                     animationClass = 'animate-flash-green';
-                    optionClass = 'bg-green-500/30 border-green-500 text-white';
+                    optionClass = 'bg-green-100 border-green-500 text-green-800 dark:bg-green-500/30 dark:border-green-500 dark:text-white';
                 } else if (isSelectedAnswer && !feedback.isCorrect) {
                     animationClass = 'animate-shake animate-flash-red';
-                    optionClass = 'bg-red-500/30 border-red-500 text-white';
+                    optionClass = 'bg-red-100 border-red-500 text-red-800 dark:bg-red-500/30 dark:border-red-500 dark:text-white';
                 } else {
-                    optionClass = 'bg-slate-700/50 border-slate-600 text-slate-400 cursor-default';
+                    optionClass = 'bg-slate-100 border-slate-300 text-slate-500 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-400 cursor-default';
                 }
               } else if (isSelected) {
-                optionClass = 'bg-amber-500/20 border-amber-500 text-white';
+                optionClass = 'bg-amber-100 border-amber-500 text-amber-900 dark:bg-amber-500/20 dark:border-amber-500 dark:text-white';
               }
 
               return (
@@ -237,7 +237,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
                   disabled={!!feedback || (isStudyMode && currentAnswer?.answerIndex !== null)}
                   className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${optionClass} ${animationClass}`}
                 >
-                  <span className={`font-mono mr-3 font-bold ${isSelected ? 'text-amber-400' : 'text-slate-400'}`}>
+                  <span className={`font-mono mr-3 font-bold ${isSelected ? 'text-amber-500 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`}>
                     {String.fromCharCode(65 + index)}.
                   </span>
                   {option}
@@ -248,11 +248,11 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
           
         </main>
         
-        <footer className="p-4 bg-slate-900/50 border-t border-slate-700 flex justify-between items-center">
+        <footer className="p-4 bg-slate-100 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
             <button
                 onClick={goToPrevious}
                 disabled={currentQuestionIndex === 0 || !!feedback}
-                className="bg-slate-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-500 transition-colors disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500"
+                className="bg-slate-200 text-slate-700 font-bold py-2 px-6 rounded-lg hover:bg-slate-300 transition-colors disabled:bg-slate-100 disabled:text-slate-400 dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
             >
                 Precedente
             </button>
@@ -260,11 +260,11 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
              <button
                 onClick={handleFinishAndGrade}
                 disabled={isFinishing}
-                className={`font-bold py-2 px-6 rounded-lg transition-colors ${
+                className={`font-bold py-2 px-6 rounded-lg transition-colors text-white ${
                     answeredCount === questions.length 
-                    ? 'bg-green-600 hover:bg-green-500 text-white animate-pulse' 
-                    : 'bg-amber-600 hover:bg-amber-500 text-white'
-                } disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500`}
+                    ? 'bg-green-600 hover:bg-green-500 animate-pulse' 
+                    : 'bg-amber-600 hover:bg-amber-500'
+                } disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 dark:disabled:text-slate-500`}
             >
                 {isFinishing ? 'Valutazione...' : 'Termina e Valuta'}
             </button>
@@ -272,7 +272,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
             <button
                 onClick={goToNext}
                 disabled={currentQuestionIndex === questions.length - 1 || !!feedback}
-                className="bg-slate-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-500 transition-colors disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500"
+                className="bg-slate-200 text-slate-700 font-bold py-2 px-6 rounded-lg hover:bg-slate-300 transition-colors disabled:bg-slate-100 disabled:text-slate-400 dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
             >
                 Successivo
             </button>

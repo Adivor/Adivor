@@ -7,7 +7,8 @@ import { Footer } from './components/Footer';
 import { QuizState, Question, UserAnswer, QuestionCategory } from './types';
 import { getQuizQuestions, getQuestionsByCategory, getQuestionsByIds } from './services/questionService';
 import { getIncorrectQuestionIds } from './services/storageService';
-import { generateExplanation } from './services/aiService';
+
+type Theme = 'light' | 'dark';
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -18,8 +19,31 @@ const App: React.FC = () => {
   const [isPracticeMode, setIsPracticeMode] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
-  const [explanations, setExplanations] = useState<Record<number, string>>({});
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [theme, setTheme] = useState<Theme>('dark');
+
+  // Effect to set initial theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    setTheme(initialTheme);
+  }, []);
+
+  // Effect to apply theme changes to the document and save to localStorage
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  
+  const handleToggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
 
   // Register service worker for PWA capabilities
   useEffect(() => {
@@ -114,42 +138,8 @@ const App: React.FC = () => {
     setIsPracticeMode(false);
     setIsReviewMode(false);
     setViewCategory(null);
-    setExplanations({});
     window.scrollTo(0, 0);
   };
-
-  // Effect to fetch explanations sequentially when the quiz is finished
-  useEffect(() => {
-    const fetchExplanationsSequentially = async () => {
-      if (quizState === 'finished' && questions.length > 0) {
-        // Set initial loading state for all questions
-        const loadingExplanations: Record<number, string> = {};
-        questions.forEach(q => {
-          loadingExplanations[q.id] = 'Caricamento...';
-        });
-        setExplanations(loadingExplanations);
-
-        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-        // Fetch explanations one by one to avoid rate limiting
-        for (const question of questions) {
-          try {
-            const explanation = await generateExplanation(question);
-            setExplanations(prev => ({ ...prev, [question.id]: explanation }));
-          } catch (error) {
-            console.error(`Failed to fetch explanation for question ${question.id}`, error);
-            setExplanations(prev => ({ ...prev, [question.id]: 'Errore imprevisto durante il recupero della spiegazione.' }));
-          }
-          // Add a small delay between each API call to be more robust against rate limits
-          await delay(250);
-        }
-      }
-    };
-
-    fetchExplanationsSequentially();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizState, questions]);
-
 
   // Effect to manage dynamic page title
   useEffect(() => {
@@ -210,7 +200,6 @@ const App: React.FC = () => {
             isPracticeMode={isPracticeMode}
             isStudyMode={isStudyMode}
             isReviewMode={isReviewMode}
-            explanations={explanations}
           />
         );
       case 'view-questions':
@@ -242,11 +231,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+    <div className="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
       <main className="flex-grow flex flex-col">
         {renderContent()}
       </main>
-      <Footer />
+      <Footer theme={theme} onToggleTheme={handleToggleTheme} />
     </div>
   );
 };

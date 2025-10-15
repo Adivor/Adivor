@@ -7,6 +7,12 @@
   <title>Simulatore Esame Radioamatore</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="/manifest.json" />
+  <script>
+    // Configura Tailwind per usare la modalità 'class' per il tema scuro
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/styles.css">
 <script type="importmap">
@@ -21,7 +27,7 @@
 }
 </script>
 </head>
-<body class="bg-slate-900 text-slate-200">
+<body>
   <div id="root"></div>
   <script>
     // Polyfill 'process' for browser environments to prevent crashes when modules

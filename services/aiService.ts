@@ -56,13 +56,13 @@ export async function generateExplanation(question: Question): Promise<string> {
     if (explanation) {
       return explanation.trim();
     } else {
-      return 'Non è stato possibile generare una spiegazione.';
+      return 'Non è stato possibile generare una spiegazione. La risposta era vuota.';
     }
   } catch (error) {
     console.error('Errore durante la generazione della spiegazione con Gemini:', error);
     if (error instanceof Error && error.message.includes('API key')) {
         return 'Errore di configurazione: API key mancante o non valida.';
     }
-    return 'A causa delle elevate richieste, la funzione di spiegazione è in questo istante limitata.';
+    return 'Si è verificato un errore durante la generazione della spiegazione. Riprova.';
   }
 }

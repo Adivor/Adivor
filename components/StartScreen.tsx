@@ -35,25 +35,25 @@ const QuestionCountModal: React.FC<QuestionCountModalProps> = ({ category, onClo
             onClick={onClose}
         >
             <div 
-                className="bg-slate-800 rounded-lg shadow-2xl p-6 md:p-8 border border-slate-700 max-w-md w-full mx-4"
+                className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 max-w-md w-full mx-4"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-2xl font-bold text-amber-300 mb-2 font-mono">Pratica per Argomento</h2>
-                <p className="text-slate-300 mb-6">Quante domande vuoi per <br/> <span className="font-bold text-amber-400">{category}</span>?</p>
+                <h2 className="text-2xl font-bold text-amber-600 dark:text-amber-300 mb-2 font-mono">Pratica per Argomento</h2>
+                <p className="text-slate-600 dark:text-slate-300 mb-6">Quante domande vuoi per <br/> <span className="font-bold text-amber-700 dark:text-amber-400">{category}</span>?</p>
                 
                 <div className="space-y-3">
                     {options.map(opt => (
                         <button 
                             key={opt}
                             onClick={() => onStart(opt)}
-                            className="w-full bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200 text-center"
+                            className="w-full bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 text-center"
                         >
                             {opt} Domande
                         </button>
                     ))}
                     <button 
                         onClick={() => onStart('all')}
-                        className="w-full bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200 text-center"
+                        className="w-full bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 text-center"
                     >
                         Tutte le domande ({totalQuestions})
                     </button>
@@ -61,7 +61,7 @@ const QuestionCountModal: React.FC<QuestionCountModalProps> = ({ category, onClo
 
                 <button 
                     onClick={onClose} 
-                    className="mt-6 w-full bg-slate-600/50 text-slate-300 font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200"
+                    className="mt-6 w-full bg-slate-200/50 text-slate-600 dark:bg-slate-600/50 dark:text-slate-300 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200"
                 >
                     Annulla
                 </button>
@@ -116,19 +116,19 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
         />
       )}
       <div className="flex flex-col flex-grow items-center justify-center p-4">
-        <div className="max-w-3xl w-full bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700">
+        <div className="max-w-3xl w-full bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-200 dark:border-slate-700">
           <div className="text-center">
             <HamQuizLogo className="w-64 mx-auto mb-6" />
-            <h1 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4 font-mono">
+            <h1 className="text-4xl md:text-5xl font-bold text-amber-600 dark:text-amber-300 mb-4 font-mono">
               Simulatore Esame Radioamatore
             </h1>
-            <p className="text-slate-300 text-lg mb-8">
+            <p className="text-slate-600 dark:text-slate-300 text-lg mb-8">
               Metti alla prova la tua preparazione con una simulazione completa dell'esame o esercitati sui singoli argomenti.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => onStartSimulation(isStudyMode)}
-                className="bg-amber-500 text-slate-900 font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-300"
+                className="bg-amber-500 text-white dark:text-slate-900 font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-600 dark:hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-400 dark:focus:ring-amber-300"
               >
                 <div className="leading-tight">
                   <div>Inizia Il Tuo Esame</div>
@@ -138,25 +138,25 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
+          <div className="mt-8 flex items-center justify-center bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg">
             <ToggleSwitch
                 id="study-mode-exam"
                 checked={isStudyMode}
                 onChange={handleStudyModeChange}
             >
-                Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
+                Modalità Studio <span className="text-xs text-slate-500 dark:text-slate-400">(mostra risposte e spiegazioni)</span>
             </ToggleSwitch>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-slate-700">
-            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Pratica per Argomento</h2>
-            <div className="mb-6 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
+          <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-bold text-center text-amber-600 dark:text-amber-300 mb-6 font-mono">Pratica per Argomento</h2>
+            <div className="mb-6 flex items-center justify-center bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg">
               <ToggleSwitch
                   id="study-mode-practice"
                   checked={isStudyMode}
                   onChange={handleStudyModeChange}
               >
-                  Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
+                  Modalità Studio <span className="text-xs text-slate-500 dark:text-slate-400">(mostra risposte e spiegazioni)</span>
               </ToggleSwitch>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -164,37 +164,37 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
                 <button
                   key={category}
                   onClick={() => handleOpenModal(category)}
-                  className="w-full bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200 text-left flex items-center"
+                  className="w-full bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 text-left flex items-center"
                 >
-                  <RadioWaveIcon className="w-5 h-5 mr-3 text-amber-500/80" />
+                  <RadioWaveIcon className="w-5 h-5 mr-3 text-amber-500" />
                   {category}
                 </button>
               ))}
             </div>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-slate-700">
-            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Ripasso</h2>
+          <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-bold text-center text-amber-600 dark:text-amber-300 mb-6 font-mono">Ripasso</h2>
              <button
               onClick={() => onStartReview(isStudyMode)}
               disabled={incorrectCount === 0}
-              className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-colors duration-200 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500"
+              className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-colors duration-200 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
             >
               Ripassa Domande Errate ({incorrectCount})
             </button>
-            {incorrectCount === 0 && <p className="text-center text-sm text-slate-400 mt-2">Nessuna domanda errata da ripassare. Ottimo lavoro!</p>}
+            {incorrectCount === 0 && <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-2">Nessuna domanda errata da ripassare. Ottimo lavoro!</p>}
           </div>
 
-          <div className="mt-12 pt-8 border-t border-slate-700">
-            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Elenco Domande Esame con Risposte Corrette</h2>
+          <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-bold text-center text-amber-600 dark:text-amber-300 mb-6 font-mono">Elenco Domande Esame con Risposte Corrette</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categories.map(category => (
                 <button
                   key={`${category}-view`}
                   onClick={() => onViewQuestions(category)}
-                  className="w-full bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200 text-left flex items-center"
+                  className="w-full bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 text-left flex items-center"
                 >
-                  <RadioWaveIcon className="w-5 h-5 mr-3 text-amber-500/80" />
+                  <RadioWaveIcon className="w-5 h-5 mr-3 text-amber-500" />
                   {category}
                 </button>
               ))}
@@ -221,8 +221,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
           </div>
 
           {canInstall && (
-            <div className="mt-12 pt-8 border-t border-slate-700 text-center">
-              <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Accesso Rapido</h2>
+            <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700 text-center">
+              <h2 className="text-2xl font-bold text-center text-amber-600 dark:text-amber-300 mb-6 font-mono">Accesso Rapido</h2>
               <button
                 onClick={onInstallClick}
                 className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-300 flex items-center justify-center gap-4"
@@ -231,7 +231,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
                 <HamQuizLogo className="w-8 h-8" />
                 <span>Installa l'App sul dispositivo</span>
               </button>
-              <p className="text-sm text-slate-400 mt-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
                 Aggiungi HamQuiz alla schermata principale per un accesso facile e veloce, anche offline.
               </p>
             </div>
