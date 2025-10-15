@@ -1,9 +1,18 @@
 import { GoogleGenAI } from "@google/genai";
 import { Question } from '../types';
 
-// Initialize the Gemini client.
-// Ensure the API_KEY is set in the environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAiInstance(): GoogleGenAI {
+  if (!aiInstance) {
+    // Initialize the Gemini client.
+    // This will only be called the first time an explanation is requested.
+    // Ensure the API_KEY is set in the environment variables.
+    aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+  }
+  return aiInstance;
+}
+
 
 /**
  * Generates a concise explanation for a given quiz question using the Gemini API.
@@ -35,6 +44,7 @@ export async function generateExplanation(question: Question): Promise<string> {
   `;
 
   try {
+    const ai = getAiInstance();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
@@ -50,6 +60,9 @@ export async function generateExplanation(question: Question): Promise<string> {
     }
   } catch (error) {
     console.error('Errore durante la generazione della spiegazione con Gemini:', error);
+    if (error instanceof Error && error.message.includes('API key')) {
+        return 'Errore di configurazione: API key mancante o non valida.';
+    }
     return 'Spiegazione non disponibile a causa di un errore di rete.';
   }
 }
