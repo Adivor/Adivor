@@ -50,7 +50,7 @@ export const QuestionsViewScreen: React.FC<QuestionsViewScreenProps> = ({ catego
 
     return (
         <>
-            <div className="min-h-screen p-4 sm:p-6 md:p-8">
+            <div className="p-4 sm:p-6 md:p-8">
                 <div className="max-w-4xl mx-auto pb-24"> {/* Added padding-bottom to ensure FAB doesn't cover last item */}
                     <div className="bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
                         <header className="p-6 text-center bg-slate-900/50 border-b border-slate-700">

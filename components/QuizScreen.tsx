@@ -157,7 +157,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   const currentCategoryStats = categoryStats[currentQuestion.category];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col flex-grow items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
         <header className="p-4 bg-slate-900/50 border-b border-slate-700">
           <div className="flex justify-between items-center gap-4 mb-2">

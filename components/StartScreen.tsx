@@ -5,6 +5,7 @@ import { getQuestionCountByCategory } from '../services/questionService';
 import { getIncorrectQuestionIds } from '../services/storageService';
 import { PayPalIcon } from './icons/PayPalIcon';
 import { HamQuizLogo } from './icons/HamQuizLogo';
+import { ToggleSwitch } from './ToggleSwitch';
 
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
@@ -97,6 +98,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
     }
     handleCloseModal();
   };
+  
+  const handleStudyModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsStudyMode(e.target.checked);
+  };
 
 
   return (
@@ -108,7 +113,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
           onStart={handleStartPractice}
         />
       )}
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex flex-col flex-grow items-center justify-center p-4">
         <div className="max-w-3xl w-full bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700">
           <div className="text-center">
             <HamQuizLogo className="w-64 mx-auto mb-6" />
@@ -130,31 +135,25 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
           </div>
 
           <div className="mt-8 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
-              <input 
-                  type="checkbox" 
-                  id="study-mode-exam" 
-                  checked={isStudyMode} 
-                  onChange={(e) => setIsStudyMode(e.target.checked)}
-                  className="w-5 h-5 rounded text-amber-500 bg-slate-700 border-slate-500 focus:ring-amber-500 focus:ring-offset-slate-800"
-              />
-              <label htmlFor="study-mode-exam" className="ml-3 text-slate-200 font-medium">
-                  Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
-              </label>
+            <ToggleSwitch
+                id="study-mode-exam"
+                checked={isStudyMode}
+                onChange={handleStudyModeChange}
+            >
+                Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
+            </ToggleSwitch>
           </div>
           
           <div className="mt-12 pt-8 border-t border-slate-700">
             <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Pratica per Argomento</h2>
             <div className="mb-6 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
-              <input 
-                  type="checkbox" 
-                  id="study-mode-practice" 
-                  checked={isStudyMode} 
-                  onChange={(e) => setIsStudyMode(e.target.checked)}
-                  className="w-5 h-5 rounded text-amber-500 bg-slate-700 border-slate-500 focus:ring-amber-500 focus:ring-offset-slate-800"
-              />
-              <label htmlFor="study-mode-practice" className="ml-3 text-slate-200 font-medium">
+              <ToggleSwitch
+                  id="study-mode-practice"
+                  checked={isStudyMode}
+                  onChange={handleStudyModeChange}
+              >
                   Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
-              </label>
+              </ToggleSwitch>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categories.map(category => (
