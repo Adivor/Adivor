@@ -101,6 +101,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
       }
     }
   }, [questions, userAnswers, isReviewMode]);
+  
 
   const headerTitle = isReviewMode ? 'Riepilogo Ripasso' : (isPracticeMode ? 'Riepilogo Pratica' : 'Risultato Esame');
   const headerIconColor = (isPracticeMode || isReviewMode)
@@ -210,7 +211,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                     <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
                       <p className="font-semibold text-sky-300 text-sm mb-1">Spiegazione:</p>
                       <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
-                        {explanations[question.id] ?? <span className="italic text-slate-400">Generazione spiegazione in corso...</span>}
+                        {explanations[question.id] ?? <span className="italic text-slate-400">Spiegazione non disponibile.</span>}
                       </p>
                     </div>
                   </div>
@@ -219,7 +220,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
             </div>
           </main>
         </div>
-        <div className="mt-8 flex justify-center items-center">
+        <div className="mt-8 flex justify-center items-center space-x-4">
           <button
             onClick={onRestart}
             className="bg-slate-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-slate-500 transition-colors"

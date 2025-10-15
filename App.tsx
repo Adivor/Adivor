@@ -3,9 +3,25 @@ import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
 import { getQuizQuestions, getQuestionsByCategory, getQuestionsByIds } from './services/questionService';
-import { getIncorrectQuestionIds, getStoredExplanations, saveExplanation } from './services/storageService';
+import { getIncorrectQuestionIds } from './services/storageService';
 import { Question, UserAnswer, QuizState, QuestionCategory } from './types';
 import { QuestionsViewScreen } from './components/QuestionsViewScreen';
+
+import { radiotecnica1Explanations } from './data/explanations/radiotecnica1';
+import { radiotecnica2Explanations } from './data/explanations/radiotecnica2';
+import { radiotecnica3Explanations } from './data/explanations/radiotecnica3';
+import { codiceQExplanations } from './data/explanations/codiceQ';
+import { regolamentiExplanations } from './data/explanations/regolamenti';
+
+// Combina tutte le spiegazioni in un unico oggetto per un facile accesso
+const allExplanations: Record<number, string> = {
+  ...radiotecnica1Explanations,
+  ...radiotecnica2Explanations,
+  ...radiotecnica3Explanations,
+  ...codiceQExplanations,
+  ...regolamentiExplanations,
+};
+
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -17,11 +33,9 @@ const App: React.FC = () => {
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
-  const [explanations, setExplanations] = useState<Record<number, string>>(getStoredExplanations);
-
+  
   const startQuiz = (getQuestions: () => Question[]) => {
     setIsLoading(true);
-    // Simulate loading to improve UX
     setTimeout(() => {
       const newQuestions = getQuestions();
       setQuestions(newQuestions);
@@ -66,13 +80,6 @@ const App: React.FC = () => {
     setUserAnswers(finalAnswers);
     setQuizState('finished');
   };
-
-  const handleExplanationGenerated = useCallback((questionId: number, explanation: string) => {
-    // Aggiorna lo stato per il feedback immediato nell'interfaccia utente
-    setExplanations(prev => ({ ...prev, [questionId]: explanation }));
-    // Salva in modo persistente nella localStorage
-    saveExplanation(questionId, explanation);
-  }, []);
   
   const handleRestart = () => {
       setQuestions([]);
@@ -82,7 +89,6 @@ const App: React.FC = () => {
       setIsStudyMode(false);
       setIsReviewMode(false);
       setViewCategory(null);
-      // Non resettare le spiegazioni per mantenerle in cache
       setQuizState('start');
   }
 
@@ -107,8 +113,6 @@ const App: React.FC = () => {
                     title={quizTitle} 
                     isStudyMode={isStudyMode} 
                     isPracticeMode={isPracticeMode}
-                    explanations={explanations}
-                    onExplanationGenerated={handleExplanationGenerated}
                 />;
       case 'finished':
         return <ResultsScreen 
@@ -119,7 +123,7 @@ const App: React.FC = () => {
                     isPracticeMode={isPracticeMode}
                     isStudyMode={isStudyMode}
                     isReviewMode={isReviewMode}
-                    explanations={explanations}
+                    explanations={allExplanations}
                 />;
       case 'view-questions':
         return <QuestionsViewScreen 

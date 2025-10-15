@@ -123,7 +123,5 @@ export const regolamentiExplanations: Record<number, string> = {
     1003: "Le amministrazioni nazionali hanno l'obbligo di prendere misure per garantire che gli apparati ISM (Industriali, Scientifici, Medici) non causino interferenze dannose ai servizi di radiocomunicazione.",
     1004: "Durante i test, è vietato utilizzare segnali che possano essere confusi con segnali di emergenza, di identificazione, abbreviazioni di servizio o altri segnali regolamentati.",
     1005: "Il Decreto del 1 marzo 2021 del MISE ha aggiornato la normativa tecnica che regola l'attività radioamatoriale in Italia, modificando l'allegato 26 del Codice delle Comunicazioni Elettroniche.",
-    1006: "Il Decreto del Direttore Generale del MISE del 20 Aprile 2021 ha definito le nuove modalità per lo svolgimento dell'esame per il conseguimento della patente di radioamatore.",
-    1007: "CQ è la chiamata generale a tutte le stazioni.",
-    1008: "L'esercizio di una stazione di radioamatore è soggetto, secondo il Codice delle Comunicazioni Elettroniche, al regime di 'autorizzazione generale'."
+    1006: "Il Decreto del Direttore Generale del MISE del 20 Aprile 2021 ha definito le nuove modalità per lo svolgimento dell'esame per il conseguimento della patente di radioamatore."
 };
