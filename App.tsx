@@ -3,6 +3,7 @@ import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
 import { QuestionsViewScreen } from './components/QuestionsViewScreen';
+import { Footer } from './components/Footer';
 import { QuizState, Question, UserAnswer, QuestionCategory } from './types';
 import { getQuizQuestions, getQuestionsByCategory, getQuestionsByIds } from './services/questionService';
 import { getIncorrectQuestionIds } from './services/storageService';
@@ -193,7 +194,14 @@ const App: React.FC = () => {
     }
   };
 
-  return <div className="bg-slate-900 text-slate-100">{renderContent()}</div>;
+  return (
+    <div className="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+      <main className="flex-grow">
+        {renderContent()}
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 export default App;
