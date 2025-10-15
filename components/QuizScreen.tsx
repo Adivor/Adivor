@@ -31,7 +31,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   // Calculate stats for each category based on answered questions
   const categoryStats = useMemo(() => {
     const stats: Record<string, { correct: number, answered: number }> = {};
-    const questionMap = new Map(questions.map(q => [q.id, q]));
+    // FIX: Add explicit types to the Map constructor to resolve type inference issues.
+    const questionMap = new Map<number, Question>(questions.map(q => [q.id, q]));
 
     for (const userAnswer of userAnswers) {
       if (userAnswer.answerIndex !== null) {
