@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Question, UserAnswer } from '../types';
 import { QUIZ_DURATION_MINUTES } from '../constants';
 import { ClockIcon } from './icons/ClockIcon';
+import { GoogleGenAI } from '@google/genai';
 
 interface QuizScreenProps {
   questions: Question[];
@@ -10,6 +11,8 @@ interface QuizScreenProps {
   title: string;
   isStudyMode: boolean;
   isPracticeMode: boolean;
+  explanations: Record<number, string>;
+  onExplanationGenerated: (questionId: number, explanation: string) => void;
 }
 
 type Feedback = {
@@ -17,7 +20,7 @@ type Feedback = {
     selectedIndex: number;
 } | null;
 
-export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onRestart, title, isStudyMode, isPracticeMode }) => {
+export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onRestart, title, isStudyMode, isPracticeMode, explanations, onExplanationGenerated }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>(() => 
     questions.map(q => ({ questionId: q.id, answerIndex: null }))
@@ -60,6 +63,31 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
     }
   }, []);
 
+  const generateExplanation = async (question: Question) => {
+    // Non generare se esiste già
+    if (explanations[question.id]) {
+      return;
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const optionsText = question.options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n');
+      const correctAnwerLetter = String.fromCharCode(65 + question.correctAnswer);
+      const prompt = `Spiega in modo diretto, chiaro e conciso in italiano (massimo 3-4 righe) perché la risposta corretta alla domanda "${question.text}" è la "${correctAnwerLetter}) ${question.options[question.correctAnswer]}". Non usare frasi introduttive come "Certamente!" o "Ecco la spiegazione". Vai dritto al punto. Le opzioni complete erano:\n${optionsText}`;
+      
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+
+      onExplanationGenerated(question.id, response.text);
+    } catch (error) {
+      console.error("Errore durante la generazione della spiegazione AI:", error);
+      onExplanationGenerated(question.id, "Si è verificato un errore durante la generazione della spiegazione. Riprova.");
+    }
+  };
+
+
   // Timer countdown effect
   useEffect(() => {
     if (isPracticeMode) return;
@@ -92,6 +120,9 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
       a.questionId === questionId ? { ...a, answerIndex: selectedIndex } : a
     );
     setUserAnswers(newAnswers);
+
+    // Avvia la generazione della spiegazione in background
+    generateExplanation(currentQuestion);
 
     if (isStudyMode) {
       const isCorrect = selectedIndex === currentQuestion.correctAnswer;
