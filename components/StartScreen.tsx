@@ -1,8 +1,10 @@
 
+
 import React, { useState } from 'react';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
 import { QuestionCategory } from '../types';
 import { getQuestionCountByCategory } from '../services/questionService';
+import { PayPalIcon } from './icons/PayPalIcon';
 
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
@@ -173,9 +175,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
               <input type="hidden" name="currency_code" value="EUR" />
               <button 
                 type="submit" 
-                className="bg-[#0070ba] hover:bg-[#005c99] text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300"
+                className="bg-[#0070ba] hover:bg-[#005c99] text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 flex items-center justify-center"
               >
-                Fai una donazione con PayPal
+                <PayPalIcon className="w-6 h-6 mr-3" />
+                <span>Fai una donazione con PayPal</span>
               </button>
             </form>
           </div>
