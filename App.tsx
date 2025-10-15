@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
@@ -74,39 +74,34 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  const fetchExplanations = useCallback(async () => {
-    if (quizState === 'finished' && questions.length > 0) {
-      // Set initial loading state for all questions
-      const loadingExplanations: Record<number, string> = {};
-      questions.forEach(q => {
-        loadingExplanations[q.id] = 'Caricamento...';
-      });
-      setExplanations(loadingExplanations);
+  // Effect to fetch explanations sequentially when the quiz is finished
+  useEffect(() => {
+    const fetchExplanationsSequentially = async () => {
+      if (quizState === 'finished' && questions.length > 0) {
+        // Set initial loading state for all questions
+        const loadingExplanations: Record<number, string> = {};
+        questions.forEach(q => {
+          loadingExplanations[q.id] = 'Caricamento...';
+        });
+        setExplanations(loadingExplanations);
 
-      // Fetch explanations in parallel
-      const explanationPromises = questions.map(async (question) => {
-        try {
-          const explanation = await generateExplanation(question);
-          return { id: question.id, explanation };
-        } catch (error) {
-          console.error(`Failed to generate explanation for question ${question.id}`, error);
-          return { id: question.id, explanation: 'Spiegazione non disponibile.' };
+        // Fetch explanations one by one to avoid rate limiting
+        for (const question of questions) {
+          try {
+            const explanation = await generateExplanation(question);
+            setExplanations(prev => ({ ...prev, [question.id]: explanation }));
+          } catch (error) {
+            console.error(`Failed to generate explanation for question ${question.id}`, error);
+            setExplanations(prev => ({ ...prev, [question.id]: 'Spiegazione non disponibile a causa di un errore di rete.' }));
+          }
         }
-      });
+      }
+    };
 
-      const results = await Promise.all(explanationPromises);
-      
-      const newExplanations = { ...loadingExplanations };
-      results.forEach(result => {
-        newExplanations[result.id] = result.explanation;
-      });
-      setExplanations(newExplanations);
-    }
+    fetchExplanationsSequentially();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizState, questions]);
 
-  useEffect(() => {
-    fetchExplanations();
-  }, [fetchExplanations]);
 
   // Effect to manage dynamic page title
   useEffect(() => {
