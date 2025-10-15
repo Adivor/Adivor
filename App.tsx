@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
-import { getQuizQuestions, getQuestionsByCategory } from './services/questionService';
+import { getQuizQuestions, getQuestionsByCategory, getQuestionsByIds } from './services/questionService';
+import { getIncorrectQuestionIds } from './services/storageService';
 import { Question, UserAnswer, QuizState, QuestionCategory } from './types';
 import { QuestionsViewScreen } from './components/QuestionsViewScreen';
 
@@ -14,6 +15,7 @@ const App: React.FC = () => {
   const [quizTitle, setQuizTitle] = useState<string>('');
   const [isPracticeMode, setIsPracticeMode] = useState<boolean>(false);
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
+  const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
 
   const startQuiz = (getQuestions: () => Question[]) => {
@@ -31,6 +33,7 @@ const App: React.FC = () => {
     setQuizTitle("Simulazione d'Esame");
     setIsPracticeMode(false);
     setIsStudyMode(studyMode);
+    setIsReviewMode(false);
     startQuiz(getQuizQuestions);
   }, []);
 
@@ -38,9 +41,21 @@ const App: React.FC = () => {
     setQuizTitle(`Pratica: ${category}`);
     setIsPracticeMode(true);
     setIsStudyMode(studyMode);
+    setIsReviewMode(false);
     startQuiz(() => getQuestionsByCategory(category, count));
   }, []);
   
+  const handleStartReview = useCallback((studyMode: boolean) => {
+    setQuizTitle("Ripasso: Domande Errate");
+    setIsPracticeMode(true); // La modalità ripasso si comporta come una pratica (senza timer/punteggio)
+    setIsStudyMode(studyMode);
+    setIsReviewMode(true);
+    startQuiz(() => {
+        const ids = getIncorrectQuestionIds();
+        return getQuestionsByIds(ids);
+    });
+  }, []);
+
   const handleViewQuestions = useCallback((category: QuestionCategory) => {
     setViewCategory(category);
     setQuizState('view-questions');
@@ -57,6 +72,7 @@ const App: React.FC = () => {
       setQuizTitle('');
       setIsPracticeMode(false);
       setIsStudyMode(false);
+      setIsReviewMode(false);
       setViewCategory(null);
       setQuizState('start');
   }
@@ -73,7 +89,7 @@ const App: React.FC = () => {
 
     switch (quizState) {
       case 'start':
-        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} onViewQuestions={handleViewQuestions}/>;
+        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} onViewQuestions={handleViewQuestions} onStartReview={handleStartReview} />;
       case 'active':
         return <QuizScreen 
                     questions={questions} 
@@ -91,6 +107,7 @@ const App: React.FC = () => {
                     title={quizTitle} 
                     isPracticeMode={isPracticeMode}
                     isStudyMode={isStudyMode}
+                    isReviewMode={isReviewMode}
                 />;
       case 'view-questions':
         return <QuestionsViewScreen 
@@ -98,7 +115,7 @@ const App: React.FC = () => {
             onBack={handleRestart}
         />;
       default:
-        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} onViewQuestions={handleViewQuestions} />;
+        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} onViewQuestions={handleViewQuestions} onStartReview={handleStartReview} />;
     }
   };
 

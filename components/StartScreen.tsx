@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
 import { QuestionCategory } from '../types';
 import { getQuestionCountByCategory } from '../services/questionService';
+import { getIncorrectQuestionIds } from '../services/storageService';
 import { PayPalIcon } from './icons/PayPalIcon';
 
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
   onStartTopicQuiz: (category: QuestionCategory, isStudyMode: boolean, count: number | 'all') => void;
   onViewQuestions: (category: QuestionCategory) => void;
+  onStartReview: (isStudyMode: boolean) => void;
 }
 
 interface QuestionCountModalProps {
@@ -65,13 +67,20 @@ const QuestionCountModal: React.FC<QuestionCountModalProps> = ({ category, onClo
 };
 
 
-export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onStartTopicQuiz, onViewQuestions }) => {
+export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onStartTopicQuiz, onViewQuestions, onStartReview }) => {
   const categories = Object.values(QuestionCategory);
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [modalState, setModalState] = useState<{ isOpen: boolean; category: QuestionCategory | null }>({
     isOpen: false,
     category: null,
   });
+  const [incorrectCount, setIncorrectCount] = useState(0);
+
+  useEffect(() => {
+    const ids = getIncorrectQuestionIds();
+    setIncorrectCount(ids.length);
+  }, []);
+
 
   const handleOpenModal = (category: QuestionCategory) => {
     setModalState({ isOpen: true, category });
@@ -111,26 +120,53 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
               onClick={() => onStartSimulation(isStudyMode)}
               className="bg-amber-500 text-slate-900 font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-300"
             >
-              Inizia Il Tuo Esame
+              <div className="leading-tight">
+                <div>Inizia Il Tuo Esame</div>
+                <div className="text-sm font-normal opacity-90">(50 domande)</div>
+              </div>
             </button>
           </div>
 
           <div className="mt-8 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
               <input 
                   type="checkbox" 
-                  id="study-mode" 
+                  id="study-mode-exam" 
                   checked={isStudyMode} 
                   onChange={(e) => setIsStudyMode(e.target.checked)}
                   className="w-5 h-5 rounded text-amber-500 bg-slate-700 border-slate-500 focus:ring-amber-500 focus:ring-offset-slate-800"
               />
-              <label htmlFor="study-mode" className="ml-3 text-slate-200 font-medium">
+              <label htmlFor="study-mode-exam" className="ml-3 text-slate-200 font-medium">
                   Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
               </label>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t border-slate-700">
+            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Ripasso</h2>
+             <button
+              onClick={() => onStartReview(isStudyMode)}
+              disabled={incorrectCount === 0}
+              className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-colors duration-200 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500"
+            >
+              Ripassa Domande Errate ({incorrectCount})
+            </button>
+            {incorrectCount === 0 && <p className="text-center text-sm text-slate-400 mt-2">Nessuna domanda errata da ripassare. Ottimo lavoro!</p>}
           </div>
 
 
           <div className="mt-12 pt-8 border-t border-slate-700">
             <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Pratica per Argomento</h2>
+            <div className="mb-6 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
+              <input 
+                  type="checkbox" 
+                  id="study-mode-practice" 
+                  checked={isStudyMode} 
+                  onChange={(e) => setIsStudyMode(e.target.checked)}
+                  className="w-5 h-5 rounded text-amber-500 bg-slate-700 border-slate-500 focus:ring-amber-500 focus:ring-offset-slate-800"
+              />
+              <label htmlFor="study-mode-practice" className="ml-3 text-slate-200 font-medium">
+                  Modalità Studio <span className="text-xs text-slate-400">(mostra risposte e spiegazioni)</span>
+              </label>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categories.map(category => (
                 <button

@@ -82,6 +82,7 @@ allQuestionsRaw.forEach(question => {
 });
 
 const ALL_QUESTIONS: Question[] = Array.from(uniqueQuestionsMap.values());
+const ALL_QUESTIONS_BY_ID: Map<number, Question> = new Map(ALL_QUESTIONS.map(q => [q.id, q]));
 
 
 function shuffleArray<T,>(array: T[]): T[] {
@@ -118,4 +119,9 @@ export const getQuizQuestions = (): Question[] => {
 
   const finalQuiz = shuffleArray([...shuffledTechnical, ...shuffledOther]);
   return finalQuiz;
+};
+
+export const getQuestionsByIds = (ids: number[]): Question[] => {
+    const questions = ids.map(id => ALL_QUESTIONS_BY_ID.get(id)).filter((q): q is Question => q !== undefined);
+    return shuffleArray(questions);
 };

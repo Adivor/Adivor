@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Question, UserAnswer } from '../types';
 import { PASSING_SCORE_PERCENTAGE } from '../constants';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 import { GoogleGenAI } from '@google/genai';
+import { getIncorrectQuestionIds, saveIncorrectQuestionIds } from '../services/storageService';
+
 
 interface ResultsScreenProps {
   questions: Question[];
@@ -13,11 +15,12 @@ interface ResultsScreenProps {
   title: string;
   isPracticeMode: boolean;
   isStudyMode: boolean;
+  isReviewMode: boolean;
 }
 
 const PDF_ELEMENT_ID = 'pdf-results';
 
-export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode }) => {
+export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, isReviewMode }) => {
   const [aiExplanations, setAiExplanations] = useState<Record<number, string | null>>({});
   const [loadingExplanationId, setLoadingExplanationId] = useState<number | null>(null);
 
@@ -37,6 +40,40 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
       isPassed: scorePercentage >= PASSING_SCORE_PERCENTAGE,
     };
   }, [questions, userAnswers]);
+
+  useEffect(() => {
+    const incorrectIds = getIncorrectQuestionIds();
+
+    if (isReviewMode) {
+      // In modalità ripasso, rimuoviamo le domande a cui si è risposto correttamente
+      const correctlyAnsweredIds = new Set(
+        questions
+          .filter(q => {
+            const userAnswer = userAnswers.find(a => a.questionId === q.id);
+            return userAnswer?.answerIndex === q.correctAnswer;
+          })
+          .map(q => q.id)
+      );
+
+      const newIncorrectIds = incorrectIds.filter(id => !correctlyAnsweredIds.has(id));
+      saveIncorrectQuestionIds(newIncorrectIds);
+
+    } else {
+      // In modalità normale, aggiungiamo le nuove domande sbagliate
+      const newIncorrectAnswerIds = questions
+        .filter(q => {
+          const userAnswer = userAnswers.find(a => a.questionId === q.id);
+          // Aggiungi solo se c'è una risposta ed è sbagliata
+          return userAnswer?.answerIndex !== null && userAnswer?.answerIndex !== q.correctAnswer;
+        })
+        .map(q => q.id);
+      
+      if (newIncorrectAnswerIds.length > 0) {
+        const combinedIds = [...new Set([...incorrectIds, ...newIncorrectAnswerIds])];
+        saveIncorrectQuestionIds(combinedIds);
+      }
+    }
+  }, [questions, userAnswers, isReviewMode]);
 
   const handleGenerateExplanation = async (question: Question) => {
     if (loadingExplanationId !== null) return;
@@ -65,7 +102,8 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
     }
   };
 
-  const headerIconColor = isPracticeMode 
+  const headerTitle = isReviewMode ? 'Riepilogo Ripasso' : (isPracticeMode ? 'Riepilogo Pratica' : 'Risultato Esame');
+  const headerIconColor = (isPracticeMode || isReviewMode)
     ? 'text-amber-400' 
     : isPassed 
       ? 'text-green-400' 
@@ -78,15 +116,15 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
           <header className="p-6 text-center bg-slate-900/50 border-b border-slate-700">
             <RadioWaveIcon className={`w-16 h-16 mx-auto mb-4 ${headerIconColor}`} />
             <h1 className="text-3xl font-bold font-mono text-slate-100">
-              {isPracticeMode ? 'Riepilogo Pratica' : 'Risultato Esame'}
+              {headerTitle}
             </h1>
             
-            {isPracticeMode ? (
-              <p className="text-2xl font-bold my-4 text-amber-400">{title.replace('Pratica: ', '')}</p>
-            ) : (
+            {!(isPracticeMode || isReviewMode) ? (
               <p className={`text-5xl font-bold my-4 ${isPassed ? 'text-green-400' : 'text-red-400'}`}>
                 {isPassed ? 'SUPERATO' : 'NON SUPERATO'}
               </p>
+            ) : (
+                 <p className="text-2xl font-bold my-4 text-amber-400">{title.replace('Pratica: ', '').replace('Ripasso: ', '')}</p>
             )}
 
             <div className="flex justify-center gap-8 text-lg">
@@ -97,7 +135,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                 <span className="font-bold">{incorrectAnswers}</span> Risposte Errate
               </div>
             </div>
-             {!isPracticeMode && <p className="text-slate-400 text-sm mt-4">Soglia superamento: {PASSING_SCORE_PERCENTAGE}%</p>}
+             {!(isPracticeMode || isReviewMode) && <p className="text-slate-400 text-sm mt-4">Soglia superamento: {PASSING_SCORE_PERCENTAGE}%</p>}
           </header>
 
           <main className="p-6">
