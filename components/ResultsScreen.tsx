@@ -165,6 +165,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                 const userAnswer = userAnswers.find(a => a.questionId === question.id);
                 const isCorrect = userAnswer?.answerIndex === question.correctAnswer;
                 const unanswered = userAnswer?.answerIndex === null;
+                const explanationText = explanations[question.id];
 
                 return (
                   <div key={question.id} className="p-4 bg-slate-700/40 rounded-lg border border-slate-600">
@@ -210,7 +211,11 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                     <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
                       <p className="font-semibold text-sky-300 text-sm mb-1">Spiegazione:</p>
                       <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
-                        {explanations[question.id] ?? <span className="italic text-slate-400">Spiegazione non disponibile.</span>}
+                        {explanationText === 'Caricamento...' ? (
+                            <span className="italic text-slate-400 animate-pulse">Generazione spiegazione...</span>
+                        ) : (
+                            explanationText ?? <span className="italic text-slate-400">Spiegazione non disponibile.</span>
+                        )}
                       </p>
                     </div>
                   </div>

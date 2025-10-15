@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
@@ -6,22 +6,7 @@ import { getQuizQuestions, getQuestionsByCategory, getQuestionsByIds } from './s
 import { getIncorrectQuestionIds } from './services/storageService';
 import { Question, UserAnswer, QuizState, QuestionCategory } from './types';
 import { QuestionsViewScreen } from './components/QuestionsViewScreen';
-
-import { radiotecnica1Explanations } from './data/explanations/radiotecnica1';
-import { radiotecnica2Explanations } from './data/explanations/radiotecnica2';
-import { radiotecnica3Explanations } from './data/explanations/radiotecnica3';
-import { codiceQExplanations } from './data/explanations/codiceQ';
-import { regolamentiExplanations } from './data/explanations/regolamenti';
-
-// Unisce tutte le spiegazioni statiche in un unico oggetto per un facile accesso
-const allExplanations: Record<number, string> = {
-  ...radiotecnica1Explanations,
-  ...radiotecnica2Explanations,
-  ...radiotecnica3Explanations,
-  ...codiceQExplanations,
-  ...regolamentiExplanations,
-};
-
+import { generateExplanation } from './services/aiService';
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -33,6 +18,27 @@ const App: React.FC = () => {
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
+  const [explanations, setExplanations] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    // Pre-carica le spiegazioni in background non appena le domande del quiz sono pronte
+    if (quizState === 'active' && questions.length > 0) {
+      const initialExplanations = Object.fromEntries(
+        questions.map(q => [q.id, 'Caricamento...'])
+      );
+      setExplanations(initialExplanations);
+
+      questions.forEach(async (q) => {
+        try {
+          const explanation = await generateExplanation(q);
+          setExplanations(prev => ({ ...prev, [q.id]: explanation }));
+        } catch (error) {
+          console.error(`Failed to generate explanation for question ${q.id}:`, error);
+          setExplanations(prev => ({ ...prev, [q.id]: 'Spiegazione non disponibile.' }));
+        }
+      });
+    }
+  }, [quizState, questions]);
 
   const startQuiz = (getQuestions: () => Question[]) => {
     setIsLoading(true);
@@ -90,6 +96,7 @@ const App: React.FC = () => {
       setIsStudyMode(false);
       setIsReviewMode(false);
       setViewCategory(null);
+      setExplanations({});
       setQuizState('start');
   }
 
@@ -124,7 +131,7 @@ const App: React.FC = () => {
                     isPracticeMode={isPracticeMode}
                     isStudyMode={isStudyMode}
                     isReviewMode={isReviewMode}
-                    explanations={allExplanations}
+                    explanations={explanations}
                 />;
       case 'view-questions':
         return <QuestionsViewScreen 
