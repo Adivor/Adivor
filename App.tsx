@@ -79,6 +79,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleViewQuestions = useCallback((category: QuestionCategory) => {
+    // Scroll to the top when viewing the questions list.
+    window.scrollTo(0, 0);
     setViewCategory(category);
     setQuizState('view-questions');
   }, []);
