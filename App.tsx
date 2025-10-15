@@ -52,6 +52,7 @@ const App: React.FC = () => {
   const handleViewQuestions = (category: QuestionCategory) => {
     setViewCategory(category);
     setQuizState('view-questions');
+    window.scrollTo(0, 0);
   };
 
   const handleFinish = (answers: UserAnswer[]) => {
@@ -69,6 +70,7 @@ const App: React.FC = () => {
     setIsReviewMode(false);
     setViewCategory(null);
     setExplanations({});
+    window.scrollTo(0, 0);
   };
 
   const fetchExplanations = useCallback(async () => {
@@ -104,6 +106,42 @@ const App: React.FC = () => {
   useEffect(() => {
     fetchExplanations();
   }, [fetchExplanations]);
+
+  // Effect to manage dynamic page title
+  useEffect(() => {
+    switch (quizState) {
+      case 'active':
+        document.title = `Quiz in corso... - ${quizTitle}`;
+        break;
+      case 'finished':
+        document.title = `Risultati - ${quizTitle}`;
+        break;
+      case 'view-questions':
+        if (viewCategory) {
+          document.title = `Elenco Domande: ${viewCategory}`;
+        }
+        break;
+      case 'start':
+      default:
+        document.title = 'Simulatore Esame Radioamatore';
+    }
+  }, [quizState, quizTitle, viewCategory]);
+
+  // Effect to prevent content copying
+  useEffect(() => {
+    const preventCopy = (e: Event) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener('contextmenu', preventCopy);
+    document.addEventListener('copy', preventCopy);
+
+    return () => {
+      document.removeEventListener('contextmenu', preventCopy);
+      document.removeEventListener('copy', preventCopy);
+    };
+  }, []); // Empty dependency array to run only once
+
 
   const renderContent = () => {
     switch (quizState) {

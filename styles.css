@@ -1,1 +1,54 @@
-full contents of styles.css
+/* Using Tailwind directives. The CDN build will process these. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom layer to apply base styles */
+@layer base {
+  body {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE 10+ and Edge */
+    user-select: none;         /* Standard syntax */
+  }
+}
+
+/* Custom animation classes needed by components */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes flash-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } /* corresponds to green-400 */
+  50% { box-shadow: 0 0 12px 4px rgba(74, 222, 128, 0.7); }
+}
+
+@keyframes flash-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } /* corresponds to red-500 */
+  50% { box-shadow: 0 0 12px 4px rgba(239, 68, 68, 0.7); }
+}
+
+/* 
+  Components use class names like 'animate-shake'. For these to work with
+  the keyframes above, they should either be configured in Tailwind or
+  explicitly defined. Given the CDN setup, defining them here is safer.
+*/
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+.animate-flash-green {
+    animation: flash-green 1s ease-out;
+}
+.animate-flash-red {
+    animation: flash-red 1s ease-out;
+}
