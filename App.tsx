@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
+  const [explanations, setExplanations] = useState<Record<number, string>>({});
 
   const startQuiz = (getQuestions: () => Question[]) => {
     setIsLoading(true);
@@ -65,6 +66,10 @@ const App: React.FC = () => {
     setUserAnswers(finalAnswers);
     setQuizState('finished');
   };
+
+  const handleExplanationGenerated = useCallback((questionId: number, explanation: string) => {
+    setExplanations(prev => ({ ...prev, [questionId]: explanation }));
+  }, []);
   
   const handleRestart = () => {
       setQuestions([]);
@@ -74,6 +79,7 @@ const App: React.FC = () => {
       setIsStudyMode(false);
       setIsReviewMode(false);
       setViewCategory(null);
+      setExplanations({});
       setQuizState('start');
   }
 
@@ -98,6 +104,8 @@ const App: React.FC = () => {
                     title={quizTitle} 
                     isStudyMode={isStudyMode} 
                     isPracticeMode={isPracticeMode}
+                    explanations={explanations}
+                    onExplanationGenerated={handleExplanationGenerated}
                 />;
       case 'finished':
         return <ResultsScreen 
@@ -108,6 +116,7 @@ const App: React.FC = () => {
                     isPracticeMode={isPracticeMode}
                     isStudyMode={isStudyMode}
                     isReviewMode={isReviewMode}
+                    explanations={explanations}
                 />;
       case 'view-questions':
         return <QuestionsViewScreen 

@@ -1,10 +1,9 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Question, UserAnswer } from '../types';
 import { PASSING_SCORE_PERCENTAGE } from '../constants';
 import { RadioWaveIcon } from './icons/RadioWaveIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
-import { GoogleGenAI } from '@google/genai';
 import { getIncorrectQuestionIds, saveIncorrectQuestionIds } from '../services/storageService';
 
 
@@ -16,13 +15,12 @@ interface ResultsScreenProps {
   isPracticeMode: boolean;
   isStudyMode: boolean;
   isReviewMode: boolean;
+  explanations: Record<number, string>;
 }
 
 const PDF_ELEMENT_ID = 'pdf-results';
 
-export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, isReviewMode }) => {
-  const [aiExplanations, setAiExplanations] = useState<Record<number, string | null>>({});
-  const [loadingExplanationId, setLoadingExplanationId] = useState<number | null>(null);
+export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, isReviewMode, explanations }) => {
 
   const { score, correctAnswers, incorrectAnswers, isPassed } = useMemo(() => {
     let correctCount = 0;
@@ -74,33 +72,6 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
       }
     }
   }, [questions, userAnswers, isReviewMode]);
-
-  const handleGenerateExplanation = async (question: Question) => {
-    if (loadingExplanationId !== null) return;
-    
-    setLoadingExplanationId(question.id);
-    
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-      
-      const correctOption = `${String.fromCharCode(65 + question.correctAnswer)}) ${question.options[question.correctAnswer]}`;
-
-      const prompt = `Sei un istruttore d'esame per radioamatori. Spiega in modo **estremamente conciso** (massimo 2-3 frasi) il concetto chiave che rende '${correctOption}' la risposta giusta per la domanda: "${question.text}". Vai dritto al punto, senza preamboli.`;
-
-      const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt
-      });
-
-      setAiExplanations(prev => ({ ...prev, [question.id]: response.text }));
-
-    } catch (error) {
-      console.error("Errore durante la generazione della spiegazione:", error);
-      setAiExplanations(prev => ({ ...prev, [question.id]: "Si è verificato un errore durante la generazione della spiegazione. Riprova." }));
-    } finally {
-      setLoadingExplanationId(null);
-    }
-  };
 
   const headerTitle = isReviewMode ? 'Riepilogo Ripasso' : (isPracticeMode ? 'Riepilogo Pratica' : 'Risultato Esame');
   const headerIconColor = (isPracticeMode || isReviewMode)
@@ -187,33 +158,12 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
                       })}
                     </div>
                     
-                    {!aiExplanations[question.id] && (
-                      <div className="mt-4 ml-9">
-                        <button
-                          onClick={() => handleGenerateExplanation(question)}
-                          disabled={loadingExplanationId !== null}
-                          className="bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-500 transition-colors disabled:bg-slate-600 disabled:cursor-wait text-sm"
-                          aria-label={`Genera spiegazione per la domanda ${index + 1}`}
-                          aria-live="polite"
-                        >
-                          {loadingExplanationId === question.id ? (
-                            <span className="flex items-center">
-                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Generazione...
-                            </span>
-                          ) : 'Spiegazione AI'}
-                        </button>
-                      </div>
-                    )}
-                    {aiExplanations[question.id] && (
-                      <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
-                          <p className="font-semibold text-sky-300 text-sm mb-1">Spiegazione AI:</p>
-                          <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">{aiExplanations[question.id]}</p>
-                      </div>
-                    )}
+                    <div className="mt-4 p-3 bg-slate-900/50 rounded-md border border-slate-600 ml-9">
+                      <p className="font-semibold text-sky-300 text-sm mb-1">Spiegazione:</p>
+                      <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
+                        {explanations[question.id] ?? <span className="italic text-slate-400">Generazione spiegazione in corso...</span>}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
