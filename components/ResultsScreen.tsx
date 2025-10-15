@@ -23,6 +23,9 @@ const PDF_ELEMENT_ID = 'pdf-results';
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAnswers, onRestart, title, isPracticeMode, isReviewMode, explanations }) => {
 
   const { score, correctAnswers, incorrectAnswers, isPassed } = useMemo(() => {
+    if (questions.length === 0) {
+      return { score: 0, correctAnswers: 0, incorrectAnswers: 0, isPassed: false };
+    }
     let correctCount = 0;
     questions.forEach(q => {
       const userAnswer = userAnswers.find(a => a.questionId === q.id);
@@ -38,6 +41,32 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
       isPassed: scorePercentage >= PASSING_SCORE_PERCENTAGE,
     };
   }, [questions, userAnswers]);
+
+  const categoryStats = useMemo(() => {
+    if (questions.length === 0) return [];
+    
+    const stats: Record<string, { correct: number; total: number }> = {};
+
+    questions.forEach(q => {
+        if (!stats[q.category]) {
+            stats[q.category] = { correct: 0, total: 0 };
+        }
+        stats[q.category].total++;
+
+        const userAnswer = userAnswers.find(a => a.questionId === q.id);
+        if (userAnswer?.answerIndex === q.correctAnswer) {
+            stats[q.category].correct++;
+        }
+    });
+
+    return Object.entries(stats).map(([category, data]) => ({
+        category,
+        ...data,
+        percentage: data.total > 0 ? (data.correct / data.total) * 100 : 0,
+    })).sort((a, b) => a.category.localeCompare(b.category));
+
+  }, [questions, userAnswers]);
+
 
   useEffect(() => {
     const incorrectIds = getIncorrectQuestionIds();
@@ -110,6 +139,26 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({ questions, userAns
           </header>
 
           <main className="p-6">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-amber-300 font-mono mb-4">Statistiche per Argomento</h2>
+              <div className="space-y-4 bg-slate-900/50 rounded-lg border border-slate-700 p-4">
+                  {categoryStats.map(stat => (
+                      <div key={stat.category}>
+                          <div className="flex justify-between items-center mb-1 text-sm sm:text-base">
+                              <p className="font-semibold text-slate-200">{stat.category}</p>
+                              <p className="font-mono text-slate-300">{stat.correct} / {stat.total} ({Math.round(stat.percentage)}%)</p>
+                          </div>
+                          <div className="w-full bg-slate-700 rounded-full h-2.5">
+                              <div
+                                  className={`${stat.percentage >= PASSING_SCORE_PERCENTAGE ? 'bg-green-500' : 'bg-sky-500'} h-2.5 rounded-full transition-colors duration-300`}
+                                  style={{ width: `${stat.percentage}%` }}
+                              ></div>
+                          </div>
+                      </div>
+                  ))}
+              </div>
+            </div>
+            
             <h2 className="text-2xl font-bold text-amber-300 font-mono mb-4">Riepilogo Domande</h2>
             <div className="space-y-6">
               {questions.map((question, index) => {

@@ -3,7 +3,7 @@ import { StartScreen } from './components/StartScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
 import { getQuizQuestions, getQuestionsByCategory, getQuestionsByIds } from './services/questionService';
-import { getIncorrectQuestionIds } from './services/storageService';
+import { getIncorrectQuestionIds, getStoredExplanations, saveExplanation } from './services/storageService';
 import { Question, UserAnswer, QuizState, QuestionCategory } from './types';
 import { QuestionsViewScreen } from './components/QuestionsViewScreen';
 
@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
-  const [explanations, setExplanations] = useState<Record<number, string>>({});
+  const [explanations, setExplanations] = useState<Record<number, string>>(getStoredExplanations);
 
   const startQuiz = (getQuestions: () => Question[]) => {
     setIsLoading(true);
@@ -68,7 +68,10 @@ const App: React.FC = () => {
   };
 
   const handleExplanationGenerated = useCallback((questionId: number, explanation: string) => {
+    // Aggiorna lo stato per il feedback immediato nell'interfaccia utente
     setExplanations(prev => ({ ...prev, [questionId]: explanation }));
+    // Salva in modo persistente nella localStorage
+    saveExplanation(questionId, explanation);
   }, []);
   
   const handleRestart = () => {
@@ -79,7 +82,7 @@ const App: React.FC = () => {
       setIsStudyMode(false);
       setIsReviewMode(false);
       setViewCategory(null);
-      setExplanations({});
+      // Non resettare le spiegazioni per mantenerle in cache
       setQuizState('start');
   }
 

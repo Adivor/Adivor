@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Question, UserAnswer } from '../types';
 import { QUIZ_DURATION_MINUTES } from '../constants';
 import { ClockIcon } from './icons/ClockIcon';
@@ -31,6 +31,29 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   
   const timeoutRef = useRef<number | null>(null);
 
+  // Calculate stats for each category based on answered questions
+  const categoryStats = useMemo(() => {
+    const stats: Record<string, { correct: number, answered: number }> = {};
+    const questionMap = new Map(questions.map(q => [q.id, q]));
+
+    for (const userAnswer of userAnswers) {
+      if (userAnswer.answerIndex !== null) {
+        const question = questionMap.get(userAnswer.questionId);
+        if (question) {
+          const category = question.category;
+          if (!stats[category]) {
+            stats[category] = { correct: 0, answered: 0 };
+          }
+          stats[category].answered++;
+          if (userAnswer.answerIndex === question.correctAnswer) {
+            stats[category].correct++;
+          }
+        }
+      }
+    }
+    return stats;
+  }, [userAnswers, questions]);
+
   // Clear timeout on unmount
   useEffect(() => {
     return () => {
@@ -50,7 +73,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const optionsText = question.options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n');
       const correctAnwerLetter = String.fromCharCode(65 + question.correctAnswer);
-      const prompt = `Sei un esperto istruttore per l'esame da radioamatore. Spiega in modo chiaro e conciso in italiano perché la risposta corretta alla domanda "${question.text}" è la "${correctAnwerLetter}) ${question.options[question.correctAnswer]}". Le opzioni complete erano:\n${optionsText}`;
+      const prompt = `Spiega in modo diretto, chiaro e conciso in italiano (massimo 3-4 righe) perché la risposta corretta alla domanda "${question.text}" è la "${correctAnwerLetter}) ${question.options[question.correctAnswer]}". Non usare frasi introduttive come "Certamente!" o "Ecco la spiegazione". Vai dritto al punto. Le opzioni complete erano:\n${optionsText}`;
       
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
@@ -158,6 +181,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   
   const isTimeLow = !isPracticeMode && timeLeft <= 5 * 60;
 
+  const currentCategoryStats = categoryStats[currentQuestion.category];
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <div className="max-w-4xl w-full bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
@@ -179,7 +204,15 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
                    <span>{formatTime(timeLeft)}</span>
                  </div>
               )}
-              <div className="text-base sm:text-lg font-mono text-slate-300 bg-slate-700/50 px-3 py-1 rounded-md">
+              <div className="text-base sm:text-lg font-mono text-slate-300 bg-slate-700/50 px-3 py-1 rounded-md flex items-center">
+                {isStudyMode && currentCategoryStats && currentCategoryStats.answered > 0 && (
+                  <span 
+                    className="text-sky-400 mr-3 text-sm font-bold" 
+                    title={`Andamento per ${currentQuestion.category}: ${currentCategoryStats.correct}/${currentCategoryStats.answered}`}
+                  >
+                    {Math.round((currentCategoryStats.correct / currentCategoryStats.answered) * 100)}%
+                  </span>
+                )}
                 <span className="text-amber-400">{currentQuestionIndex + 1}</span>/{questions.length}
               </div>
             </div>
