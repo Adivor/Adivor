@@ -117,26 +117,30 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ questions, onFinish, onR
   };
   
   const handleFinishAndGrade = () => {
+    // Prevent double-clicks
     if (isFinishing) {
+      return;
+    }
+
+    const unansweredCount = questions.length - answeredCount;
+
+    // If there are unanswered questions, always show a confirmation dialog.
+    if (unansweredCount > 0) {
+      const userConfirmed = window.confirm(
+        `Ci sono ${unansweredCount} domande senza risposta. Sei sicuro di voler terminare? Le domande senza risposta verranno contate come errate.`
+      );
+      
+      // If the user clicks "Cancel", abort the finish process.
+      if (!userConfirmed) {
         return;
+      }
     }
 
-    const allAnswered = answeredCount === questions.length;
-
-    // Show confirmation unless all questions have been answered.
-    const shouldConfirm = !allAnswered;
-
-    if (shouldConfirm) {
-        const userConfirmed = window.confirm("Sei sicuro di voler terminare? Le domande senza risposta verranno contate come errate.");
-        if (!userConfirmed) {
-            return; // User cancelled, do nothing.
-        }
-    }
-    
-    // Proceed to finish
+    // Proceed to finish if all questions are answered or if the user confirmed.
     setIsFinishing(true);
     onFinish(userAnswers);
   };
+
 
   const handleReturnHome = () => {
     onRestart();
