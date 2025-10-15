@@ -141,19 +141,6 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
           </div>
           
           <div className="mt-12 pt-8 border-t border-slate-700">
-            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Ripasso</h2>
-             <button
-              onClick={() => onStartReview(isStudyMode)}
-              disabled={incorrectCount === 0}
-              className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-colors duration-200 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500"
-            >
-              Ripassa Domande Errate ({incorrectCount})
-            </button>
-            {incorrectCount === 0 && <p className="text-center text-sm text-slate-400 mt-2">Nessuna domanda errata da ripassare. Ottimo lavoro!</p>}
-          </div>
-
-
-          <div className="mt-12 pt-8 border-t border-slate-700">
             <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Pratica per Argomento</h2>
             <div className="mb-6 flex items-center justify-center bg-slate-900/50 p-4 rounded-lg">
               <input 
@@ -181,6 +168,18 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
             </div>
           </div>
           
+          <div className="mt-12 pt-8 border-t border-slate-700">
+            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Ripasso</h2>
+             <button
+              onClick={() => onStartReview(isStudyMode)}
+              disabled={incorrectCount === 0}
+              className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-colors duration-200 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500"
+            >
+              Ripassa Domande Errate ({incorrectCount})
+            </button>
+            {incorrectCount === 0 && <p className="text-center text-sm text-slate-400 mt-2">Nessuna domanda errata da ripassare. Ottimo lavoro!</p>}
+          </div>
+
           <div className="mt-12 pt-8 border-t border-slate-700">
             <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Elenco Domande Esame con Risposte Corrette</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
