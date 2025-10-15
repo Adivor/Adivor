@@ -19,4 +19,4 @@ export interface UserAnswer {
   answerIndex: number | null;
 }
 
-export type QuizState = 'start' | 'active' | 'finished';
+export type QuizState = 'start' | 'active' | 'finished' | 'view-questions';

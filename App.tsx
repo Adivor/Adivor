@@ -4,6 +4,7 @@ import { QuizScreen } from './components/QuizScreen';
 import { ResultsScreen } from './components/ResultsScreen';
 import { getQuizQuestions, getQuestionsByCategory } from './services/questionService';
 import { Question, UserAnswer, QuizState, QuestionCategory } from './types';
+import { QuestionsViewScreen } from './components/QuestionsViewScreen';
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [quizTitle, setQuizTitle] = useState<string>('');
   const [isPracticeMode, setIsPracticeMode] = useState<boolean>(false);
   const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
+  const [viewCategory, setViewCategory] = useState<QuestionCategory | null>(null);
 
   const startQuiz = (getQuestions: () => Question[]) => {
     setIsLoading(true);
@@ -38,6 +40,11 @@ const App: React.FC = () => {
     setIsStudyMode(studyMode);
     startQuiz(() => getQuestionsByCategory(category, count));
   }, []);
+  
+  const handleViewQuestions = useCallback((category: QuestionCategory) => {
+    setViewCategory(category);
+    setQuizState('view-questions');
+  }, []);
 
   const handleFinish = (finalAnswers: UserAnswer[]) => {
     setUserAnswers(finalAnswers);
@@ -50,6 +57,7 @@ const App: React.FC = () => {
       setQuizTitle('');
       setIsPracticeMode(false);
       setIsStudyMode(false);
+      setViewCategory(null);
       setQuizState('start');
   }
 
@@ -65,7 +73,7 @@ const App: React.FC = () => {
 
     switch (quizState) {
       case 'start':
-        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} />;
+        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} onViewQuestions={handleViewQuestions}/>;
       case 'active':
         return <QuizScreen 
                     questions={questions} 
@@ -84,8 +92,13 @@ const App: React.FC = () => {
                     isPracticeMode={isPracticeMode}
                     isStudyMode={isStudyMode}
                 />;
+      case 'view-questions':
+        return <QuestionsViewScreen 
+            category={viewCategory!} 
+            onBack={handleRestart}
+        />;
       default:
-        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} />;
+        return <StartScreen onStartSimulation={handleStartSimulation} onStartTopicQuiz={handleStartTopicQuiz} onViewQuestions={handleViewQuestions} />;
     }
   };
 

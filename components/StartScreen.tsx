@@ -7,6 +7,7 @@ import { getQuestionCountByCategory } from '../services/questionService';
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
   onStartTopicQuiz: (category: QuestionCategory, isStudyMode: boolean, count: number | 'all') => void;
+  onViewQuestions: (category: QuestionCategory) => void;
 }
 
 interface QuestionCountModalProps {
@@ -64,7 +65,7 @@ const QuestionCountModal: React.FC<QuestionCountModalProps> = ({ category, onClo
 };
 
 
-export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onStartTopicQuiz }) => {
+export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onStartTopicQuiz, onViewQuestions }) => {
   const categories = Object.values(QuestionCategory);
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [modalState, setModalState] = useState<{ isOpen: boolean; category: QuestionCategory | null }>({
@@ -136,6 +137,22 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
                 <button
                   key={category}
                   onClick={() => handleOpenModal(category)}
+                  className="w-full bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200 text-left flex items-center"
+                >
+                  <RadioWaveIcon className="w-5 h-5 mr-3 text-amber-500/80" />
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t border-slate-700">
+            <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Elenco Domande Esame con Risposte Corrette</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {categories.map(category => (
+                <button
+                  key={`${category}-view`}
+                  onClick={() => onViewQuestions(category)}
                   className="w-full bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors duration-200 text-left flex items-center"
                 >
                   <RadioWaveIcon className="w-5 h-5 mr-3 text-amber-500/80" />
