@@ -89,6 +89,9 @@ const App: React.FC = () => {
   };
   
   const handleRestart = () => {
+      // Scroll to the top of the page for a clean transition to home.
+      window.scrollTo(0, 0);
+      
       setQuestions([]);
       setUserAnswers([]);
       setQuizTitle('');
