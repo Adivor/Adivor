@@ -165,6 +165,21 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
           <p className="text-sm text-slate-500 mt-12 text-center">
             In bocca al lupo! 73
           </p>
+
+          <div className="text-center mt-5">
+            <form action="https://www.paypal.com/donate" method="post" target="_blank" className="inline-block">
+              <input type="hidden" name="business" value="hamquizcontatti@gmail.com" />
+              <input type="hidden" name="no_recurring" value="0" />
+              <input type="hidden" name="currency_code" value="EUR" />
+              <button 
+                type="submit" 
+                className="bg-[#0070ba] hover:bg-[#005c99] text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300"
+              >
+                Fai una donazione con PayPal
+              </button>
+            </form>
+          </div>
+
         </div>
       </div>
     </>
