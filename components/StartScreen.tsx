@@ -6,7 +6,6 @@ import { getIncorrectQuestionIds } from '../services/storageService';
 import { PayPalIcon } from './icons/PayPalIcon';
 import { HamQuizLogo } from './icons/HamQuizLogo';
 import { ToggleSwitch } from './ToggleSwitch';
-import { InstallIcon } from './icons/InstallIcon';
 
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
@@ -136,16 +135,6 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
                   <div className="text-sm font-normal opacity-90">(50 domande)</div>
                 </div>
               </button>
-              {canInstall && (
-                  <button
-                    onClick={onInstallClick}
-                    className="bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-300 flex items-center gap-3"
-                    aria-label="Installa l'applicazione sul tuo dispositivo"
-                  >
-                    <InstallIcon className="w-6 h-6" />
-                    <span>Installa App</span>
-                  </button>
-              )}
             </div>
           </div>
 
@@ -230,6 +219,23 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
               </button>
             </form>
           </div>
+
+          {canInstall && (
+            <div className="mt-12 pt-8 border-t border-slate-700 text-center">
+              <h2 className="text-2xl font-bold text-center text-amber-300 mb-6 font-mono">Accesso Rapido</h2>
+              <button
+                onClick={onInstallClick}
+                className="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-sky-500 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-300 flex items-center justify-center gap-4"
+                aria-label="Installa l'applicazione sul tuo dispositivo per un accesso rapido"
+              >
+                <HamQuizLogo className="w-8 h-8" />
+                <span>Installa l'App sul dispositivo</span>
+              </button>
+              <p className="text-sm text-slate-400 mt-4">
+                Aggiungi HamQuiz alla schermata principale per un accesso facile e veloce, anche offline.
+              </p>
+            </div>
+          )}
 
         </div>
       </div>
