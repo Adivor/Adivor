@@ -4,6 +4,7 @@ import { QuestionCategory } from '../types';
 import { getQuestionCountByCategory } from '../services/questionService';
 import { getIncorrectQuestionIds } from '../services/storageService';
 import { PayPalIcon } from './icons/PayPalIcon';
+import { HamQuizLogo } from './icons/HamQuizLogo';
 
 interface StartScreenProps {
   onStartSimulation: (isStudyMode: boolean) => void;
@@ -110,7 +111,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartSimulation, onS
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="max-w-3xl w-full bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4 font-mono mt-6">
+            <HamQuizLogo className="w-64 mx-auto mb-6" />
+            <h1 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4 font-mono">
               Simulatore Esame Radioamatore
             </h1>
             <p className="text-slate-300 text-lg mb-8">

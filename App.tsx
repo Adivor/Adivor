@@ -21,6 +21,27 @@ const App: React.FC = () => {
   const [explanations, setExplanations] = useState<Record<number, string>>({});
 
   useEffect(() => {
+    // Gestione dinamica del titolo della pagina
+    const baseTitle = 'HamQuiz | Simulatore Esame Radioamatore';
+    switch (quizState) {
+      case 'start':
+        document.title = baseTitle;
+        break;
+      case 'active':
+        document.title = `${quizTitle} - In Corso... | HamQuiz`;
+        break;
+      case 'finished':
+        document.title = `Risultati: ${quizTitle} | HamQuiz`;
+        break;
+      case 'view-questions':
+        document.title = `Elenco: ${viewCategory} | HamQuiz`;
+        break;
+      default:
+        document.title = baseTitle;
+    }
+  }, [quizState, quizTitle, viewCategory]);
+
+  useEffect(() => {
     // Pre-carica le spiegazioni in background non appena le domande del quiz sono pronte
     if (quizState === 'active' && questions.length > 0) {
       const initialExplanations = Object.fromEntries(
